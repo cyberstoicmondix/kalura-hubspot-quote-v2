@@ -1,0 +1,258 @@
+.document {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 794px;
+  margin: 0 auto;
+  padding: 42px 46px 55px;
+  background: #ffffff;
+  color: #111111;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.logoArea {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 34px;
+}
+
+.logo {
+  display: block;
+  width: 105px;
+  height: auto;
+}
+
+.documentTitle {
+  margin: 0 0 30px;
+  color: #111111;
+  font-size: 23px;
+  line-height: 1.1;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sectionHeading {
+  margin: 0 0 15px;
+  color: #2f5597;
+  font-size: 17px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.subHeading {
+  margin: 17px 0 5px;
+  color: #2f5597;
+  font-size: 14px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.introText {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.bodyText {
+  font-size: 13px;
+}
+
+.bodyText p {
+  margin: 0 0 13px;
+}
+
+.bodyText ul {
+  margin: 0 0 14px 20px;
+  padding: 0;
+}
+
+.bodyText li {
+  margin-bottom: 2px;
+}
+
+.infoTable {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.infoTable th,
+.infoTable td {
+  padding: 4px 6px;
+  border: 1px solid #333333;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.infoTable th {
+  width: 32%;
+  font-weight: 700;
+}
+
+.infoTable td {
+  width: 68%;
+  height: 22px;
+  padding: 0 6px;
+}
+
+.formInput {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 25px;
+  padding: 2px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #111111;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.formInput:focus {
+  background: #f7f9fc;
+  box-shadow: inset 0 -1px 0 #2f5597;
+}
+
+.formInput::placeholder {
+  color: transparent;
+}
+
+.combinedAddress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.combinedAddress .formInput {
+  flex: 1;
+}
+
+.postcodeInput {
+  box-sizing: border-box;
+  width: 80px;
+  min-height: 25px;
+  padding: 2px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #111111;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+.postcodeInput:focus {
+  background: #f7f9fc;
+  box-shadow: inset 0 -1px 0 #2f5597;
+}
+
+.planOptions {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.planOptions label {
+  display: block;
+  margin: 1px 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.infoTable input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px 0 0;
+  vertical-align: -2px;
+  cursor: pointer;
+  accent-color: #2f5597;
+}
+
+.checkboxRow {
+  padding: 4px 6px !important;
+}
+
+.checkboxRow label {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.periodSection {
+  margin-top: 18px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  color: #222222;
+  font-size: 9px;
+}
+
+@media (max-width: 700px) {
+  .document {
+    padding: 25px 20px 45px;
+  }
+
+  .logo {
+    width: 90px;
+  }
+
+  .documentTitle {
+    font-size: 20px;
+  }
+
+  .sectionHeading {
+    font-size: 15px;
+  }
+
+  .subHeading {
+    font-size: 13px;
+  }
+
+  .infoTable {
+    font-size: 11px;
+  }
+
+  .infoTable th,
+  .infoTable td {
+    padding: 4px;
+  }
+
+  .combinedAddress {
+    gap: 4px;
+  }
+
+  .postcodeInput {
+    width: 65px;
+  }
+}
+
+@media print {
+  .document {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .formInput,
+  .postcodeInput {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .sectionHeading,
+  .subHeading,
+  .infoTable,
+  .periodSection {
+    break-inside: avoid;
+  }
+
+  .footer {
+    break-inside: avoid;
+  }
+}

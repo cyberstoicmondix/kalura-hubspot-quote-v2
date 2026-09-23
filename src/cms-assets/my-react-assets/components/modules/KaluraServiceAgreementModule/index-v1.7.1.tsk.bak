@@ -1,0 +1,110 @@
+// Kalura Service Agreement module v1.7.1
+//
+// Purpose:
+// - Preserve the currently working HubSpot quote-editor behavior exactly.
+// - For the published/signing render, load the complete participant-edited
+//   Service Agreement from ONE HubSpot Quote CRM property.
+// - The WordPress Service Agreement plugin synchronizes that property before
+//   it queues the existing recall -> publish worker.
+//
+// Required HubSpot Quote property:
+//   kalura_service_agreement_data
+//
+// Property type:
+//   Multi-line text
+//
+// The property contains JSON for the complete participant-editable agreement.
+// Using one property keeps the CRM schema small and supports Sections 1-25,
+// without changing the existing HubSpot editor fields.
+
+import { Island } from "@hubspot/cms-components";
+// @ts-expect-error -- ?island is not typed
+import ServiceAgreementIsland from "./islands/ServiceAgreement?island";
+import type { FieldValues } from "./fields";
+
+interface HublData {
+  quoteId?: string | number | null;
+  isQuoteBlueprint?: boolean;
+  isInEditor?: boolean;
+  isInPreviewer?: boolean;
+  participantDataJson?: string | null;
+}
+
+interface Props {
+  fieldValues: FieldValues;
+  hublData: HublData;
+}
+
+export const hublDataTemplate = `
+  {% set quoteId = quoteTemplateContext.quote.hs_object_id %}
+
+  {% if quoteId and not is_in_editor and not is_in_previewer and not isQuoteBlueprint %}
+    {% set quoteRecord = crm_object("quote", quoteId) %}
+    {% set participantDataJson = quoteRecord.kalura_service_agreement_data|default("") %}
+  {% else %}
+    {% set participantDataJson = "" %}
+  {% endif %}
+
+  {% set hublData = {
+    "quoteId": quoteId,
+    "isQuoteBlueprint": isQuoteBlueprint,
+    "isInEditor": is_in_editor,
+    "isInPreviewer": is_in_previewer,
+    "participantDataJson": participantDataJson
+  } %}
+`;
+
+export function Component({ fieldValues, hublData }: Props) {
+  const quoteId = hublData?.quoteId ? String(hublData.quoteId) : null;
+  const isQuoteBlueprint = Boolean(hublData?.isQuoteBlueprint);
+  const isInEditor = Boolean(hublData?.isInEditor);
+  const isInPreviewer = Boolean(hublData?.isInPreviewer);
+
+  // CRITICAL: never merge participant CRM data while the HubSpot quote editor
+  // is open. This preserves the current working editor behavior unchanged.
+  let publishedParticipantData: Partial<FieldValues> = {};
+
+  if (!isInEditor && !isInPreviewer && !isQuoteBlueprint) {
+    const json = hublData?.participantDataJson || "";
+
+    if (json) {
+      try {
+        const parsed = JSON.parse(json);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          publishedParticipantData = parsed as Partial<FieldValues>;
+        }
+      } catch (_error) {
+        // Keep the normal HubSpot field values if the CRM JSON is invalid.
+        publishedParticipantData = {};
+      }
+    }
+  }
+
+  const effectiveFieldValues = {
+    ...fieldValues,
+    ...publishedParticipantData,
+  } as FieldValues;
+
+  const props = {
+    ...effectiveFieldValues,
+    quoteId,
+    isQuoteBlueprint,
+    isInPreviewer,
+    isInEditor,
+  };
+
+  return (
+    <Island
+      module={ServiceAgreementIsland}
+      hydrateOn="load"
+      {...props}
+    />
+  );
+}
+
+export { fields } from "./fields";
+
+export const meta = {
+  label: "Kalura Service Agreement",
+  content_types: ["QUOTE", "QUOTE_BLUEPRINT"],
+};

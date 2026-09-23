@@ -1,0 +1,67 @@
+import { Island } from "@hubspot/cms-components";
+
+// @ts-expect-error -- ?island is not typed
+import ServiceAgreementIsland from "./islands/ServiceAgreement?island";
+
+import type { FieldValues } from "./fields";
+
+export { fields } from "./fields";
+
+export const hublDataTemplate = `
+  {% set hublData = {
+    "quoteId": quoteTemplateContext.quote.hs_object_id,
+    "isQuoteBlueprint": isQuoteBlueprint,
+    "isInEditor": is_in_editor,
+    "isInPreviewer": is_in_previewer
+  } %}
+`;
+
+interface HublData {
+  quoteId?: string | number | null;
+  isQuoteBlueprint?: boolean;
+  isInEditor?: boolean;
+  isInPreviewer?: boolean;
+}
+
+interface Props {
+  fieldValues: FieldValues;
+  hublData: HublData;
+}
+
+export function Component({ fieldValues, hublData }: Props) {
+  const quoteId = hublData?.quoteId ? String(hublData.quoteId) : null;
+
+  const isQuoteBlueprint = Boolean(hublData?.isQuoteBlueprint);
+
+  const isInEditor = Boolean(hublData?.isInEditor);
+
+  const isInPreviewer = Boolean(hublData?.isInPreviewer);
+
+  const props = {
+    ...fieldValues,
+    quoteId,
+    isQuoteBlueprint,
+    isInPreviewer,
+    isInEditor,
+  };
+
+  console.log("KALURA SERVICE AGREEMENT CONTEXT:", {
+    quoteId,
+    isQuoteBlueprint,
+    isInEditor,
+    isInPreviewer,
+  });
+
+  /*
+   * Render the React island in the editor as well.
+   *
+   * This is required for the interactive test fields and
+   * persistence logic to actually execute in the browser.
+   */
+  return <Island module={ServiceAgreementIsland} hydrateOn="load" {...props} />;
+}
+
+export const meta = {
+  label: "Kalura Service Agreement",
+  content_types: ["QUOTE", "QUOTE_BLUEPRINT"],
+};

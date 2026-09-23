@@ -1,0 +1,32 @@
+import { Island, useEditorVariableChecks } from "@hubspot/cms-components";
+// @ts-expect-error -- ?island is not typed
+import ServiceAgreementIsland from "./islands/ServiceAgreement?island";
+import ServiceAgreement from "./islands/ServiceAgreement";
+
+import type { FieldValues } from "./fields";
+
+export { fields } from "./fields";
+
+interface Props {
+  fieldValues: FieldValues;
+}
+
+export function Component({ fieldValues }: Props) {
+  const { is_in_editor: isInEditor } = useEditorVariableChecks();
+
+  const props = {
+    ...fieldValues,
+    isInEditor,
+  };
+
+  if (isInEditor) {
+    return <ServiceAgreement {...props} />;
+  }
+
+  return <Island module={ServiceAgreementIsland} hydrateOn="load" {...props} />;
+}
+
+export const meta = {
+  label: "Kalura Service Agreement",
+  content_types: ["QUOTE", "QUOTE_BLUEPRINT"],
+};

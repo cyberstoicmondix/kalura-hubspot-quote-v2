@@ -1,0 +1,18 @@
+import { ModuleFields, TextField } from "@hubspot/cms-components/fields";
+
+export interface FieldValues {
+  participantFullName: string;
+  ndisNumber: string;
+}
+
+export const fields = (
+  <ModuleFields>
+    <TextField
+      name="participantFullName"
+      label="Participant Full Name"
+      default=""
+    />
+
+    <TextField name="ndisNumber" label="NDIS Number" default="" />
+  </ModuleFields>
+);

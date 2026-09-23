@@ -1,0 +1,51 @@
+import { Island, useEditorVariableChecks } from "@hubspot/cms-components";
+
+// @ts-expect-error -- ?island is not typed
+import ServiceAgreementIsland from "./islands/ServiceAgreement?island";
+import ServiceAgreement from "./islands/ServiceAgreement";
+
+import type { FieldValues } from "./fields";
+
+export { fields } from "./fields";
+
+interface HublData {
+  quoteId: string | null;
+  isQuoteBlueprint: boolean;
+  isInPreviewer: boolean;
+}
+
+interface Props {
+  fieldValues: FieldValues;
+  hublData: HublData;
+}
+
+export function Component({ fieldValues, hublData }: Props) {
+  const { is_in_editor: isInEditor } = useEditorVariableChecks();
+
+  const props = {
+    ...fieldValues,
+    isInEditor,
+    quoteId: hublData.quoteId,
+    isQuoteBlueprint: hublData.isQuoteBlueprint,
+    isInPreviewer: hublData.isInPreviewer,
+  };
+
+  if (isInEditor) {
+    return <ServiceAgreement {...props} />;
+  }
+
+  return <Island module={ServiceAgreementIsland} hydrateOn="load" {...props} />;
+}
+
+export const hublDataTemplate = `
+  {% set hublData = {
+    "quoteId": quoteTemplateContext.quote.hs_object_id,
+    "isQuoteBlueprint": isQuoteBlueprint,
+    "isInPreviewer": is_in_previewer
+  } %}
+`;
+
+export const meta = {
+  label: "Kalura Service Agreement",
+  content_types: ["QUOTE", "QUOTE_BLUEPRINT"],
+};
