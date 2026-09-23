@@ -3,3 +3,6 @@ dist/
 .env
 *.log
 hs-temp-repo-sync/
+
+# HubSpot link folder
+.hs
