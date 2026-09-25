@@ -400,7 +400,7 @@ export default function ServiceAgreement({
   >("idle");
   const [syncMessage, setSyncMessage] = useState("");
 
-  const API_BASE = "https://kalura.com.au/wp-json/kalura/v1/service-agreement";
+  const API_BASE = "https://kalura.com.au/wp-json/kalura/v2/service-agreement";
 
   const getSavedValue = <T,>(
     data: Record<string, unknown>,
