@@ -1,4 +1,4 @@
-// Kalura Service Agreement module V2
+// Kalura Service Agreement module v1.6.5 (participant edits Section 24 only)
 import { useEffect, useRef, useState } from "react";
 import styles from "../ServiceAgreement.module.css";
 
@@ -109,82 +109,6 @@ function TextArea({
   );
 }
 
-/**
- * Schedule-of-Supports cell editor.
- *
- * In the HubSpot editor, cells auto-grow as text is entered so the full value
- * remains visible. In participant/PDF rendering, the value is rendered as a
- * wrapping block instead of a fixed-height form control. This prevents long
- * sentences from being clipped by PDF rendering.
- */
-function SupportScheduleCell({
-  value,
-  onChange,
-  editable,
-  rows = 2,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  editable: boolean;
-  rows?: number;
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const resize = () => {
-    const element = textareaRef.current;
-    if (!element) return;
-    element.style.height = "auto";
-    element.style.height = `${element.scrollHeight}px`;
-  };
-
-  useEffect(() => {
-    if (editable) resize();
-  }, [value, editable]);
-
-  if (!editable) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          minHeight: "42px",
-          boxSizing: "border-box",
-          padding: "5px",
-          fontSize: "10px",
-          lineHeight: 1.35,
-          whiteSpace: "pre-wrap",
-          overflowWrap: "anywhere",
-          wordBreak: "break-word",
-          overflow: "visible",
-        }}
-      >
-        {value || "\u00a0"}
-      </div>
-    );
-  }
-
-  return (
-    <textarea
-      ref={textareaRef}
-      className={styles.formTextarea}
-      value={value}
-      rows={rows}
-      onChange={(event) => onChange(event.target.value)}
-      onInput={resize}
-      style={{
-        width: "100%",
-        minHeight: "42px",
-        height: "auto",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        resize: "none",
-        whiteSpace: "pre-wrap",
-        overflowWrap: "anywhere",
-        wordBreak: "break-word",
-      }}
-    />
-  );
-}
-
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h2 className={styles.sectionHeading}>{children}</h2>;
 }
@@ -195,6 +119,48 @@ function SubHeading({ children }: { children: React.ReactNode }) {
 
 function BulletList({ children }: { children: React.ReactNode }) {
   return <ul className={styles.bulletList}>{children}</ul>;
+}
+
+type YesNoValue = "yes" | "no" | "";
+
+/** The Section 24 (Participant Consent Form) answers. */
+interface Section24Values {
+  consentPersonalInfo: YesNoValue;
+  consentProviders: YesNoValue;
+  consentResearch: YesNoValue;
+  consentNdisPortal: YesNoValue;
+  consentNdisPlan: YesNoValue;
+  consentNdisPortion: YesNoValue;
+  photoService: YesNoValue;
+  photoMarketing: YesNoValue;
+  photoPublications: YesNoValue;
+  newsletter: YesNoValue;
+  serviceOpportunities: YesNoValue;
+  consentGiven: boolean;
+  consentName: string;
+}
+
+/**
+ * The exact payload the participant sends to WordPress. Participants may only
+ * ever write these 13 keys (the server drops anything else). consentgiven and
+ * consentname are lowercase because that is how WordPress stores them.
+ */
+function toSection24Payload(values: Section24Values) {
+  return {
+    consentPersonalInfo: values.consentPersonalInfo,
+    consentProviders: values.consentProviders,
+    consentResearch: values.consentResearch,
+    consentNdisPortal: values.consentNdisPortal,
+    consentNdisPlan: values.consentNdisPlan,
+    consentNdisPortion: values.consentNdisPortion,
+    photoService: values.photoService,
+    photoMarketing: values.photoMarketing,
+    photoPublications: values.photoPublications,
+    newsletter: values.newsletter,
+    serviceOpportunities: values.serviceOpportunities,
+    consentgiven: values.consentGiven,
+    consentname: values.consentName,
+  };
 }
 
 export default function ServiceAgreement({
@@ -236,6 +202,19 @@ export default function ServiceAgreement({
   supportDescription3: supportDescription3Prop,
   supportPrice3: supportPrice3Prop,
   supportDelivery3: supportDelivery3Prop,
+  consentPersonalInfo: consentPersonalInfoProp,
+  consentProviders: consentProvidersProp,
+  consentResearch: consentResearchProp,
+  consentNdisPortal: consentNdisPortalProp,
+  consentNdisPlan: consentNdisPlanProp,
+  consentNdisPortion: consentNdisPortionProp,
+  photoService: photoServiceProp,
+  photoMarketing: photoMarketingProp,
+  photoPublications: photoPublicationsProp,
+  newsletter: newsletterProp,
+  serviceOpportunities: serviceOpportunitiesProp,
+  consentGiven: consentGivenProp,
+  consentName: consentNameProp,
   understanding: understandingProp,
   communicationUsed: communicationUsedProp,
   communicationDeclined: communicationDeclinedProp,
@@ -307,71 +286,25 @@ export default function ServiceAgreement({
   const [supportPrice3, setSupportPrice3] = useState(supportPrice3Prop || "");
   const [supportDelivery3, setSupportDelivery3] = useState(supportDelivery3Prop || "");
 
-  // Section 23 — 7 columns × 6 rows.
-  const [supportItemNameNumber1, setSupportItemNameNumber1] = useState("");
-  const [supportItemDescription1, setSupportItemDescription1] = useState("");
-  const [supportServiceDayTimeLocation1, setSupportServiceDayTimeLocation1] = useState("");
-  const [supportFrequency1, setSupportFrequency1] = useState("");
-  const [supportPriceHour1, setSupportPriceHour1] = useState("");
-  const [supportQuantity1, setSupportQuantity1] = useState("");
-  const [supportTotalPrice1, setSupportTotalPrice1] = useState("");
-  const [supportItemNameNumber2, setSupportItemNameNumber2] = useState("");
-  const [supportItemDescription2, setSupportItemDescription2] = useState("");
-  const [supportServiceDayTimeLocation2, setSupportServiceDayTimeLocation2] = useState("");
-  const [supportFrequency2, setSupportFrequency2] = useState("");
-  const [supportPriceHour2, setSupportPriceHour2] = useState("");
-  const [supportQuantity2, setSupportQuantity2] = useState("");
-  const [supportTotalPrice2, setSupportTotalPrice2] = useState("");
-  const [supportItemNameNumber3, setSupportItemNameNumber3] = useState("");
-  const [supportItemDescription3, setSupportItemDescription3] = useState("");
-  const [supportServiceDayTimeLocation3, setSupportServiceDayTimeLocation3] = useState("");
-  const [supportFrequency3, setSupportFrequency3] = useState("");
-  const [supportPriceHour3, setSupportPriceHour3] = useState("");
-  const [supportQuantity3, setSupportQuantity3] = useState("");
-  const [supportTotalPrice3, setSupportTotalPrice3] = useState("");
-  const [supportItemNameNumber4, setSupportItemNameNumber4] = useState("");
-  const [supportItemDescription4, setSupportItemDescription4] = useState("");
-  const [supportServiceDayTimeLocation4, setSupportServiceDayTimeLocation4] = useState("");
-  const [supportFrequency4, setSupportFrequency4] = useState("");
-  const [supportPriceHour4, setSupportPriceHour4] = useState("");
-  const [supportQuantity4, setSupportQuantity4] = useState("");
-  const [supportTotalPrice4, setSupportTotalPrice4] = useState("");
-  const [supportItemNameNumber5, setSupportItemNameNumber5] = useState("");
-  const [supportItemDescription5, setSupportItemDescription5] = useState("");
-  const [supportServiceDayTimeLocation5, setSupportServiceDayTimeLocation5] = useState("");
-  const [supportFrequency5, setSupportFrequency5] = useState("");
-  const [supportPriceHour5, setSupportPriceHour5] = useState("");
-  const [supportQuantity5, setSupportQuantity5] = useState("");
-  const [supportTotalPrice5, setSupportTotalPrice5] = useState("");
-  const [supportItemNameNumber6, setSupportItemNameNumber6] = useState("");
-  const [supportItemDescription6, setSupportItemDescription6] = useState("");
-  const [supportServiceDayTimeLocation6, setSupportServiceDayTimeLocation6] = useState("");
-  const [supportFrequency6, setSupportFrequency6] = useState("");
-  const [supportPriceHour6, setSupportPriceHour6] = useState("");
-  const [supportQuantity6, setSupportQuantity6] = useState("");
-  const [supportTotalPrice6, setSupportTotalPrice6] = useState("");
+  // Section 24 — Participant Consent Form. Initial values come from the
+  // published HubSpot quote property (via index.tsx) so the very first
+  // server render already shows the participant's saved answers.
+  const [consentPersonalInfo, setConsentPersonalInfo] = useState<YesNoValue>(consentPersonalInfoProp || "");
+  const [consentProviders, setConsentProviders] = useState<YesNoValue>(consentProvidersProp || "");
+  const [consentResearch, setConsentResearch] = useState<YesNoValue>(consentResearchProp || "");
+  const [consentNdisPortal, setConsentNdisPortal] = useState<YesNoValue>(consentNdisPortalProp || "");
+  const [consentNdisPlan, setConsentNdisPlan] = useState<YesNoValue>(consentNdisPlanProp || "");
+  const [consentNdisPortion, setConsentNdisPortion] = useState<YesNoValue>(consentNdisPortionProp || "");
 
-  const [consentPersonalInfo, setConsentPersonalInfo] = useState<"yes" | "no" | "">("");
-  const [consentProviders, setConsentProviders] = useState<"yes" | "no" | "">("");
-  const [consentResearch, setConsentResearch] = useState<"yes" | "no" | "">("");
-  const [consentNdisPortal, setConsentNdisPortal] = useState<"yes" | "no" | "">("");
-  const [consentNdisPlan, setConsentNdisPlan] = useState<"yes" | "no" | "">("");
-  const [consentNdisPortion, setConsentNdisPortion] = useState<
-    "yes" | "no" | ""
-  >("");
+  const [photoService, setPhotoService] = useState<YesNoValue>(photoServiceProp || "");
+  const [photoMarketing, setPhotoMarketing] = useState<YesNoValue>(photoMarketingProp || "");
+  const [photoPublications, setPhotoPublications] = useState<YesNoValue>(photoPublicationsProp || "");
 
-  const [photoService, setPhotoService] = useState<"yes" | "no" | "">("");
-  const [photoMarketing, setPhotoMarketing] = useState<"yes" | "no" | "">("");
-  const [photoPublications, setPhotoPublications] = useState<"yes" | "no" | "">("");
+  const [newsletter, setNewsletter] = useState<YesNoValue>(newsletterProp || "");
+  const [serviceOpportunities, setServiceOpportunities] = useState<YesNoValue>(serviceOpportunitiesProp || "");
 
-  const [newsletter, setNewsletter] = useState<"yes" | "no" | "">("");
-  const [serviceOpportunities, setServiceOpportunities] = useState<
-    "yes" | "no" | ""
-  >("");
-
-  // Additional Section 24 fields required by the PHP participant allowlist.
-  const [consentGiven, setConsentGiven] = useState(false);
-  const [consentName, setConsentName] = useState("");
+  const [consentGiven, setConsentGiven] = useState(Boolean(consentGivenProp));
+  const [consentName, setConsentName] = useState(consentNameProp || "");
 
   const [understanding, setUnderstanding] = useState(Boolean(understandingProp));
   const [communicationUsed, setCommunicationUsed] = useState(Boolean(communicationUsedProp));
@@ -394,6 +327,17 @@ export default function ServiceAgreement({
   const skipNextSave = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Participant saving: JSON of the Section 24 answers last confirmed by the
+  // server (or loaded from it). A save is only needed when the current answers
+  // differ from this. null = the saved answers have not been loaded yet, so
+  // nothing may be saved (this prevents blanks overwriting stored answers).
+  const section24Synced = useRef<string | null>(null);
+  // A save that is waiting for its debounce timer. Flushed if the page is hidden
+  // or left, so an answer given just before "Sign now" is never lost.
+  const pendingSave = useRef<{ url: string; body: string } | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [syncStatus, setSyncStatus] = useState<
     "idle" | "saving" | "updating" | "ready" | "failed"
@@ -482,61 +426,37 @@ export default function ServiceAgreement({
         setSupportDescription3(getSavedValue(data, "supportDescription3", supportDescription3Prop || ""));
         setSupportPrice3(getSavedValue(data, "supportPrice3", supportPrice3Prop || ""));
         setSupportDelivery3(getSavedValue(data, "supportDelivery3", supportDelivery3Prop || ""));
-        setSupportItemNameNumber1(getSavedValue(data, "supportItemNameNumber1", ""));
-        setSupportItemDescription1(getSavedValue(data, "supportItemDescription1", ""));
-        setSupportServiceDayTimeLocation1(getSavedValue(data, "supportServiceDayTimeLocation1", ""));
-        setSupportFrequency1(getSavedValue(data, "supportFrequency1", ""));
-        setSupportPriceHour1(getSavedValue(data, "supportPriceHour1", ""));
-        setSupportQuantity1(getSavedValue(data, "supportQuantity1", ""));
-        setSupportTotalPrice1(getSavedValue(data, "supportTotalPrice1", ""));
-        setSupportItemNameNumber2(getSavedValue(data, "supportItemNameNumber2", ""));
-        setSupportItemDescription2(getSavedValue(data, "supportItemDescription2", ""));
-        setSupportServiceDayTimeLocation2(getSavedValue(data, "supportServiceDayTimeLocation2", ""));
-        setSupportFrequency2(getSavedValue(data, "supportFrequency2", ""));
-        setSupportPriceHour2(getSavedValue(data, "supportPriceHour2", ""));
-        setSupportQuantity2(getSavedValue(data, "supportQuantity2", ""));
-        setSupportTotalPrice2(getSavedValue(data, "supportTotalPrice2", ""));
-        setSupportItemNameNumber3(getSavedValue(data, "supportItemNameNumber3", ""));
-        setSupportItemDescription3(getSavedValue(data, "supportItemDescription3", ""));
-        setSupportServiceDayTimeLocation3(getSavedValue(data, "supportServiceDayTimeLocation3", ""));
-        setSupportFrequency3(getSavedValue(data, "supportFrequency3", ""));
-        setSupportPriceHour3(getSavedValue(data, "supportPriceHour3", ""));
-        setSupportQuantity3(getSavedValue(data, "supportQuantity3", ""));
-        setSupportTotalPrice3(getSavedValue(data, "supportTotalPrice3", ""));
-        setSupportItemNameNumber4(getSavedValue(data, "supportItemNameNumber4", ""));
-        setSupportItemDescription4(getSavedValue(data, "supportItemDescription4", ""));
-        setSupportServiceDayTimeLocation4(getSavedValue(data, "supportServiceDayTimeLocation4", ""));
-        setSupportFrequency4(getSavedValue(data, "supportFrequency4", ""));
-        setSupportPriceHour4(getSavedValue(data, "supportPriceHour4", ""));
-        setSupportQuantity4(getSavedValue(data, "supportQuantity4", ""));
-        setSupportTotalPrice4(getSavedValue(data, "supportTotalPrice4", ""));
-        setSupportItemNameNumber5(getSavedValue(data, "supportItemNameNumber5", ""));
-        setSupportItemDescription5(getSavedValue(data, "supportItemDescription5", ""));
-        setSupportServiceDayTimeLocation5(getSavedValue(data, "supportServiceDayTimeLocation5", ""));
-        setSupportFrequency5(getSavedValue(data, "supportFrequency5", ""));
-        setSupportPriceHour5(getSavedValue(data, "supportPriceHour5", ""));
-        setSupportQuantity5(getSavedValue(data, "supportQuantity5", ""));
-        setSupportTotalPrice5(getSavedValue(data, "supportTotalPrice5", ""));
-        setSupportItemNameNumber6(getSavedValue(data, "supportItemNameNumber6", ""));
-        setSupportItemDescription6(getSavedValue(data, "supportItemDescription6", ""));
-        setSupportServiceDayTimeLocation6(getSavedValue(data, "supportServiceDayTimeLocation6", ""));
-        setSupportFrequency6(getSavedValue(data, "supportFrequency6", ""));
-        setSupportPriceHour6(getSavedValue(data, "supportPriceHour6", ""));
-        setSupportQuantity6(getSavedValue(data, "supportQuantity6", ""));
-        setSupportTotalPrice6(getSavedValue(data, "supportTotalPrice6", ""));
-        setConsentPersonalInfo(getSavedValue(data, "consentPersonalInfo", ""));
-        setConsentProviders(getSavedValue(data, "consentProviders", ""));
-        setConsentResearch(getSavedValue(data, "consentResearch", ""));
-        setConsentNdisPortal(getSavedValue(data, "consentNdisPortal", ""));
-        setConsentNdisPlan(getSavedValue(data, "consentNdisPlan", ""));
-        setConsentNdisPortion(getSavedValue(data, "consentNdisPortion", ""));
-        setPhotoService(getSavedValue(data, "photoService", ""));
-        setPhotoMarketing(getSavedValue(data, "photoMarketing", ""));
-        setPhotoPublications(getSavedValue(data, "photoPublications", ""));
-        setNewsletter(getSavedValue(data, "newsletter", ""));
-        setServiceOpportunities(getSavedValue(data, "serviceOpportunities", ""));
-        setConsentGiven(Boolean(getSavedValue(data, "consentgiven", false)));
-        setConsentName(getSavedValue(data, "consentname", ""));
+        const loaded24: Section24Values = {
+          consentPersonalInfo: getSavedValue(data, "consentPersonalInfo", consentPersonalInfoProp || "") as YesNoValue,
+          consentProviders: getSavedValue(data, "consentProviders", consentProvidersProp || "") as YesNoValue,
+          consentResearch: getSavedValue(data, "consentResearch", consentResearchProp || "") as YesNoValue,
+          consentNdisPortal: getSavedValue(data, "consentNdisPortal", consentNdisPortalProp || "") as YesNoValue,
+          consentNdisPlan: getSavedValue(data, "consentNdisPlan", consentNdisPlanProp || "") as YesNoValue,
+          consentNdisPortion: getSavedValue(data, "consentNdisPortion", consentNdisPortionProp || "") as YesNoValue,
+          photoService: getSavedValue(data, "photoService", photoServiceProp || "") as YesNoValue,
+          photoMarketing: getSavedValue(data, "photoMarketing", photoMarketingProp || "") as YesNoValue,
+          photoPublications: getSavedValue(data, "photoPublications", photoPublicationsProp || "") as YesNoValue,
+          newsletter: getSavedValue(data, "newsletter", newsletterProp || "") as YesNoValue,
+          serviceOpportunities: getSavedValue(data, "serviceOpportunities", serviceOpportunitiesProp || "") as YesNoValue,
+          consentGiven: Boolean(getSavedValue(data, "consentgiven", Boolean(consentGivenProp))),
+          consentName: getSavedValue(data, "consentname", consentNameProp || ""),
+        };
+        setConsentPersonalInfo(loaded24.consentPersonalInfo);
+        setConsentProviders(loaded24.consentProviders);
+        setConsentResearch(loaded24.consentResearch);
+        setConsentNdisPortal(loaded24.consentNdisPortal);
+        setConsentNdisPlan(loaded24.consentNdisPlan);
+        setConsentNdisPortion(loaded24.consentNdisPortion);
+        setPhotoService(loaded24.photoService);
+        setPhotoMarketing(loaded24.photoMarketing);
+        setPhotoPublications(loaded24.photoPublications);
+        setNewsletter(loaded24.newsletter);
+        setServiceOpportunities(loaded24.serviceOpportunities);
+        setConsentGiven(loaded24.consentGiven);
+        setConsentName(loaded24.consentName);
+        // Baseline for change detection: participants only save when Section 24
+        // differs from what the server already holds.
+        section24Synced.current = JSON.stringify(toSection24Payload(loaded24));
         setUnderstanding(Boolean(getSavedValue(data, "understanding", understandingProp)));
         setCommunicationUsed(Boolean(getSavedValue(data, "communicationUsed", communicationUsedProp)));
         setCommunicationDeclined(Boolean(getSavedValue(data, "communicationDeclined", communicationDeclinedProp)));
@@ -553,10 +473,11 @@ export default function ServiceAgreement({
         hasLoadedAgreement.current = true;
         skipNextSave.current = true;
         setSyncStatus("ready");
-        setSyncMessage(isParticipantMode ? "Ready for review and signing" : "Editor changes are saved automatically");
+        setSyncMessage(isParticipantMode ? "Please complete Section 24. Your answers are saved automatically." : "Editor changes are saved automatically");
       } catch (error) {
         console.error("Kalura Service Agreement load error:", error);
         hasLoadedAgreement.current = true;
+        setLoadFailed(true);
         setSyncStatus("failed");
         setSyncMessage("Unable to load saved agreement data.");
       }
@@ -567,16 +488,26 @@ export default function ServiceAgreement({
   }, [quoteId, isQuoteBlueprint, isInPreviewer, isInEditor]);
 
   useEffect(() => {
-    // Participant view is strictly read-only. Only the HubSpot editor saves.
-    if (!isInEditor) return;
     if (!quoteId || isQuoteBlueprint || isInPreviewer || !hasLoadedAgreement.current) return;
 
-    if (skipNextSave.current) {
+    const section24Data = toSection24Payload({
+      consentPersonalInfo, consentProviders, consentResearch, consentNdisPortal,
+      consentNdisPlan, consentNdisPortion, photoService, photoMarketing,
+      photoPublications, newsletter, serviceOpportunities, consentGiven, consentName,
+    });
+
+    if (isParticipantMode) {
+      // Participants may only change Section 24. Never save before the load has
+      // produced a baseline, and never save when nothing changed.
+      if (section24Synced.current === null) return;
+      if (JSON.stringify(section24Data) === section24Synced.current) return;
+    } else if (skipNextSave.current) {
       skipNextSave.current = false;
       return;
     }
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (statusTimer.current) clearTimeout(statusTimer.current);
 
     const agreementData = {
       heading: agreementHeading || "SERVICE AGREEMENT",
@@ -617,24 +548,6 @@ export default function ServiceAgreement({
       supportDescription3,
       supportPrice3,
       supportDelivery3,
-      supportItemNameNumber1, supportItemDescription1,
-      supportServiceDayTimeLocation1, supportFrequency1,
-      supportPriceHour1, supportQuantity1, supportTotalPrice1,
-      supportItemNameNumber2, supportItemDescription2,
-      supportServiceDayTimeLocation2, supportFrequency2,
-      supportPriceHour2, supportQuantity2, supportTotalPrice2,
-      supportItemNameNumber3, supportItemDescription3,
-      supportServiceDayTimeLocation3, supportFrequency3,
-      supportPriceHour3, supportQuantity3, supportTotalPrice3,
-      supportItemNameNumber4, supportItemDescription4,
-      supportServiceDayTimeLocation4, supportFrequency4,
-      supportPriceHour4, supportQuantity4, supportTotalPrice4,
-      supportItemNameNumber5, supportItemDescription5,
-      supportServiceDayTimeLocation5, supportFrequency5,
-      supportPriceHour5, supportQuantity5, supportTotalPrice5,
-      supportItemNameNumber6, supportItemDescription6,
-      supportServiceDayTimeLocation6, supportFrequency6,
-      supportPriceHour6, supportQuantity6, supportTotalPrice6,
       consentPersonalInfo,
       consentProviders,
       consentResearch,
@@ -662,15 +575,25 @@ export default function ServiceAgreement({
       kaluraDate,
     };
 
+    const payload = isParticipantMode ? section24Data : agreementData;
+    const requestBody = JSON.stringify(payload);
+    // Kept so a page-hide flush can send it if the debounce hasn't fired yet.
+    pendingSave.current = { url: DATA_ENDPOINT, body: requestBody };
+    if (isParticipantMode) {
+      setSyncStatus("saving");
+      setSyncMessage("Saving your changes... Please wait before signing.");
+    }
+
     saveTimer.current = setTimeout(async () => {
+      pendingSave.current = null;
       try {
         setSyncStatus("saving");
-        setSyncMessage(isParticipantMode ? "Saving your changes..." : "Saving editor changes...");
+        setSyncMessage(isParticipantMode ? "Saving your changes... Please wait before signing." : "Saving editor changes...");
 
         const response = await fetch(DATA_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(agreementData),
+          body: requestBody,
         });
         const result = await response.json().catch(() => null);
         if (!response.ok) throw new Error(result?.message || `HTTP ${response.status}`);
@@ -681,15 +604,17 @@ export default function ServiceAgreement({
           return;
         }
 
+        section24Synced.current = JSON.stringify(section24Data);
+
         const republishStatus = result?.republish?.status;
-        if (republishStatus === "completed") {
+        if (republishStatus === "completed" || republishStatus === "idle") {
           setSyncStatus("ready");
-          setSyncMessage("✓ Updated and ready for signing");
+          setSyncMessage("✓ Saved. Your changes will appear in the signing document.");
           return;
         }
 
         setSyncStatus("updating");
-        setSyncMessage("Changes saved. Updating the signing document...");
+        setSyncMessage("Changes saved. Updating the signing document... Please wait before signing.");
 
         const pollStatus = async () => {
           try {
@@ -699,9 +624,9 @@ export default function ServiceAgreement({
 
             const status = statusResult?.republish?.status;
             const message = statusResult?.republish?.message;
-            if (status === "completed") {
+            if (status === "completed" || status === "idle") {
               setSyncStatus("ready");
-              setSyncMessage("✓ Updated and ready for signing");
+              setSyncMessage("✓ Saved. Your changes will appear in the signing document.");
               return;
             }
             if (status === "failed") {
@@ -710,7 +635,7 @@ export default function ServiceAgreement({
               return;
             }
             setSyncStatus("updating");
-            setSyncMessage(message || "Updating the signing document...");
+            setSyncMessage((message || "Updating the signing document...") + " Please wait before signing.");
             statusTimer.current = setTimeout(pollStatus, 3000);
           } catch (pollError) {
             console.error("Kalura Service Agreement republish status error:", pollError);
@@ -724,14 +649,14 @@ export default function ServiceAgreement({
         setSyncStatus("failed");
         setSyncMessage(isParticipantMode ? "Unable to save your changes. Please try again." : "Unable to save editor changes.");
       }
-    }, isParticipantMode ? 800 : 600);
+    }, isParticipantMode ? 400 : 600);
 
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       if (statusTimer.current) clearTimeout(statusTimer.current);
     };
   }, [
-    quoteId, isQuoteBlueprint, isInPreviewer, isInEditor,
+    quoteId, isQuoteBlueprint, isInPreviewer, isInEditor, retryNonce,
     agreementHeading, fullName, dateOfBirth, address, suburb, state, postcode,
     ndisNumberValue, ndisStartDate, ndisEndDate, startDate, endDate, agreementIntro,
     planManagement, ndisPlanAttached, ndisPlanNotShared,
@@ -740,24 +665,6 @@ export default function ServiceAgreement({
     supportItem1, supportDescription1, supportPrice1, supportDelivery1,
     supportItem2, supportDescription2, supportPrice2, supportDelivery2,
     supportItem3, supportDescription3, supportPrice3, supportDelivery3,
-    supportItemNameNumber1, supportItemDescription1,
-    supportServiceDayTimeLocation1, supportFrequency1,
-    supportPriceHour1, supportQuantity1, supportTotalPrice1,
-    supportItemNameNumber2, supportItemDescription2,
-    supportServiceDayTimeLocation2, supportFrequency2,
-    supportPriceHour2, supportQuantity2, supportTotalPrice2,
-    supportItemNameNumber3, supportItemDescription3,
-    supportServiceDayTimeLocation3, supportFrequency3,
-    supportPriceHour3, supportQuantity3, supportTotalPrice3,
-    supportItemNameNumber4, supportItemDescription4,
-    supportServiceDayTimeLocation4, supportFrequency4,
-    supportPriceHour4, supportQuantity4, supportTotalPrice4,
-    supportItemNameNumber5, supportItemDescription5,
-    supportServiceDayTimeLocation5, supportFrequency5,
-    supportPriceHour5, supportQuantity5, supportTotalPrice5,
-    supportItemNameNumber6, supportItemDescription6,
-    supportServiceDayTimeLocation6, supportFrequency6,
-    supportPriceHour6, supportQuantity6, supportTotalPrice6,
     consentPersonalInfo, consentProviders, consentResearch, consentNdisPortal,
     consentNdisPlan, consentNdisPortion, photoService, photoMarketing, photoPublications,
     newsletter, serviceOpportunities, consentGiven, consentName,
@@ -766,6 +673,37 @@ export default function ServiceAgreement({
     representativeName, representativeDate, kaluraSigningName, kaluraSignature, kaluraDate,
   ]);
 
+  // Participants: if the page is hidden/closed (e.g. Sign now navigates away)
+  // before the debounce fires, send the pending Section 24 save immediately.
+  useEffect(() => {
+    if (!isParticipantMode || typeof window === "undefined") return;
+
+    const flush = () => {
+      const pending = pendingSave.current;
+      if (!pending) return;
+      pendingSave.current = null;
+      try {
+        fetch(pending.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: pending.body,
+          keepalive: true,
+        }).catch(() => {});
+      } catch (flushError) {
+        console.error("Kalura Service Agreement flush error:", flushError);
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isParticipantMode]);
 
   return (
     <div className={styles.document}>
@@ -774,6 +712,62 @@ export default function ServiceAgreement({
           ================================================================ */}
 
       <h1 className={styles.mainTitle}>{agreementHeading || "SERVICE AGREEMENT"}</h1>
+
+      {quoteId && !isQuoteBlueprint && !isInPreviewer && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            margin: "0 0 18px",
+            padding: "10px 14px",
+            border: "1px solid #d9e2e7",
+            borderRadius: "6px",
+            background: syncStatus === "failed" ? "#fff5f5" : "#f7fafb",
+            color: syncStatus === "failed" ? "#a12626" : "#334155",
+            fontSize: "14px",
+            lineHeight: 1.45,
+          }}
+        >
+          {syncMessage || "Ready"}
+          {isParticipantMode && syncStatus === "failed" && !loadFailed && (
+            <button
+              type="button"
+              onClick={() => setRetryNonce((n) => n + 1)}
+              style={{
+                marginLeft: "12px",
+                padding: "4px 12px",
+                border: "1px solid #a12626",
+                borderRadius: "4px",
+                background: "#ffffff",
+                color: "#a12626",
+                fontSize: "13px",
+                cursor: "pointer",
+              }}
+            >
+              Retry
+            </button>
+          )}
+        </div>
+      )}
+
+      <div
+        role="note"
+        style={{
+          margin: "0 0 18px",
+          padding: "10px 14px",
+          border: "1px solid #cbd5e1",
+          borderRadius: "6px",
+          background: "#f8fafc",
+          color: "#334155",
+          fontSize: "13px",
+          lineHeight: 1.45,
+        }}
+      >
+        <strong>{isInEditor ? "Editor mode:" : "Participant mode:"}</strong>{" "}
+        {isInEditor
+          ? "Sections 1–23 and 25 are editable here. Section 24 (Participant Consent Form) is completed by the participant. Changes are saved automatically."
+          : "Please complete Section 24 (Participant Consent Form). Your answers are saved automatically and will appear in the signing document."}
+      </div>
 
       <fieldset disabled={!isInEditor} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <SectionHeading>1. PARTIES TO THIS AGREEMENT</SectionHeading>
@@ -2104,88 +2098,97 @@ export default function ServiceAgreement({
 
         <SubHeading>Agreed supports and prices</SubHeading>
 
-        <table
-          className={styles.supportsTable}
-          style={{
-            width: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "collapse",
-          }}
-        >
-          <colgroup>
-            <col style={{ width: "17.67%" }} />
-            <col style={{ width: "16.68%" }} />
-            <col style={{ width: "15.70%" }} />
-            <col style={{ width: "15.70%" }} />
-            <col style={{ width: "11.78%" }} />
-            <col style={{ width: "9.82%" }} />
-            <col style={{ width: "18%" }} />
-          </colgroup>
+        <table className={styles.supportsTable}>
           <thead>
             <tr>
-              <th>Support Item Name and Number</th>
-              <th>Support Item Description</th>
-              <th>Service Day, Time and Location</th>
-              <th>Frequency/Service Arrangement</th>
-              <th>Price per Hour</th>
-              <th>Quantity</th>
-              <th>Total Price</th>
+              <th>Support item</th>
+              <th>Description (scope and volume)</th>
+              <th>Price and payment information</th>
+              <th>How, when and where provided</th>
             </tr>
           </thead>
+
           <tbody>
-            {[1, 2, 3, 4, 5, 6].map((rowNumber) => {
-              const values = {
-                1: [supportItemNameNumber1, supportItemDescription1, supportServiceDayTimeLocation1, supportFrequency1, supportPriceHour1, supportQuantity1, supportTotalPrice1],
-                2: [supportItemNameNumber2, supportItemDescription2, supportServiceDayTimeLocation2, supportFrequency2, supportPriceHour2, supportQuantity2, supportTotalPrice2],
-                3: [supportItemNameNumber3, supportItemDescription3, supportServiceDayTimeLocation3, supportFrequency3, supportPriceHour3, supportQuantity3, supportTotalPrice3],
-                4: [supportItemNameNumber4, supportItemDescription4, supportServiceDayTimeLocation4, supportFrequency4, supportPriceHour4, supportQuantity4, supportTotalPrice4],
-                5: [supportItemNameNumber5, supportItemDescription5, supportServiceDayTimeLocation5, supportFrequency5, supportPriceHour5, supportQuantity5, supportTotalPrice5],
-                6: [supportItemNameNumber6, supportItemDescription6, supportServiceDayTimeLocation6, supportFrequency6, supportPriceHour6, supportQuantity6, supportTotalPrice6],
-              }[rowNumber];
+            <tr>
+              <td>
+                <TextInput value={supportItem1} onChange={setSupportItem1} />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDescription1}
+                  onChange={setSupportDescription1}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportPrice1}
+                  onChange={setSupportPrice1}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDelivery1}
+                  onChange={setSupportDelivery1}
+                  rows={3}
+                />
+              </td>
+            </tr>
 
-              const setters = {
-                1: [setSupportItemNameNumber1, setSupportItemDescription1, setSupportServiceDayTimeLocation1, setSupportFrequency1, setSupportPriceHour1, setSupportQuantity1, setSupportTotalPrice1],
-                2: [setSupportItemNameNumber2, setSupportItemDescription2, setSupportServiceDayTimeLocation2, setSupportFrequency2, setSupportPriceHour2, setSupportQuantity2, setSupportTotalPrice2],
-                3: [setSupportItemNameNumber3, setSupportItemDescription3, setSupportServiceDayTimeLocation3, setSupportFrequency3, setSupportPriceHour3, setSupportQuantity3, setSupportTotalPrice3],
-                4: [setSupportItemNameNumber4, setSupportItemDescription4, setSupportServiceDayTimeLocation4, setSupportFrequency4, setSupportPriceHour4, setSupportQuantity4, setSupportTotalPrice4],
-                5: [setSupportItemNameNumber5, setSupportItemDescription5, setSupportServiceDayTimeLocation5, setSupportFrequency5, setSupportPriceHour5, setSupportQuantity5, setSupportTotalPrice5],
-                6: [setSupportItemNameNumber6, setSupportItemDescription6, setSupportServiceDayTimeLocation6, setSupportFrequency6, setSupportPriceHour6, setSupportQuantity6, setSupportTotalPrice6],
-              }[rowNumber];
+            <tr>
+              <td>
+                <TextInput value={supportItem2} onChange={setSupportItem2} />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDescription2}
+                  onChange={setSupportDescription2}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportPrice2}
+                  onChange={setSupportPrice2}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDelivery2}
+                  onChange={setSupportDelivery2}
+                  rows={3}
+                />
+              </td>
+            </tr>
 
-              return (
-                <tr
-                  key={rowNumber}
-                  style={{
-                    height: "auto",
-                    breakInside: "auto",
-                    pageBreakInside: "auto",
-                  }}
-                >
-                  {values.map((value, columnIndex) => (
-                    <td
-                      key={columnIndex}
-                      style={{
-                        padding: "3px",
-                        verticalAlign: "top",
-                        height: "auto",
-                        minHeight: "48px",
-                        overflow: "visible",
-                        whiteSpace: "normal",
-                        overflowWrap: "anywhere",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      <SupportScheduleCell
-                        value={value}
-                        onChange={setters[columnIndex]}
-                        editable={Boolean(isInEditor)}
-                        rows={2}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+            <tr>
+              <td>
+                <TextInput value={supportItem3} onChange={setSupportItem3} />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDescription3}
+                  onChange={setSupportDescription3}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportPrice3}
+                  onChange={setSupportPrice3}
+                  rows={3}
+                />
+              </td>
+              <td>
+                <TextArea
+                  value={supportDelivery3}
+                  onChange={setSupportDelivery3}
+                  rows={3}
+                />
+              </td>
+            </tr>
           </tbody>
         </table>
 
@@ -2251,18 +2254,16 @@ export default function ServiceAgreement({
           <tbody>
             <tr>
               <td>
-                <SupportScheduleCell
+                <TextArea
                   value={conditions}
                   onChange={setConditions}
-                  editable={Boolean(isInEditor)}
                   rows={4}
                 />
               </td>
               <td>
-                <SupportScheduleCell
+                <TextArea
                   value={conditionReasons}
                   onChange={setConditionReasons}
-                  editable={Boolean(isInEditor)}
                   rows={4}
                 />
               </td>
@@ -2290,49 +2291,28 @@ export default function ServiceAgreement({
           <tbody>
             <tr>
               <td>
-                <SupportScheduleCell
+                <TextInput
                   value={fundingComponent}
                   onChange={setFundingComponent}
-                  editable={Boolean(isInEditor)}
-                  rows={2}
                 />
               </td>
               <td>
-                <SupportScheduleCell
-                  value={fundingDates}
-                  onChange={setFundingDates}
-                  editable={Boolean(isInEditor)}
-                  rows={2}
-                />
+                <TextInput value={fundingDates} onChange={setFundingDates} />
               </td>
               <td>
-                <SupportScheduleCell
-                  value={fundingNotes}
-                  onChange={setFundingNotes}
-                  editable={Boolean(isInEditor)}
-                  rows={3}
-                />
+                <TextArea value={fundingNotes} onChange={setFundingNotes} />
               </td>
             </tr>
           </tbody>
         </table>
         </div>
 
-      {/*
-        SECTION 24 — PARTICIPANT CONSENT FORM
+      </fieldset>
+      {/* ================================================================
+          24. PARTICIPANT CONSENT FORM
+          ================================================================ */}
 
-        Temporarily disabled. The complete section is intentionally excluded
-        from the Service Agreement render while the participant consent
-        persistence/signing workflow is being revised.
-
-        Original Section 24 content: commented out below.
-      */}
-
-      {/*
-        ================================================================
-        24. PARTICIPANT CONSENT FORM
-        ================================================================
-
+      <fieldset disabled={isInEditor || loadFailed} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <div className={styles.majorSection}>
         <SectionHeading>24. PARTICIPANT CONSENT FORM</SectionHeading>
 
@@ -2630,14 +2610,14 @@ export default function ServiceAgreement({
         </table>
       </div>
 
-      */}
-
+      </fieldset>
+      <fieldset disabled={!isInEditor} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {/* ================================================================
-          24. AGREEMENT SIGNATURES
+          25. AGREEMENT SIGNATURES
           ================================================================ */}
 
         <div className={styles.majorSection}>
-          <SectionHeading>24. AGREEMENT SIGNATURES</SectionHeading>
+          <SectionHeading>25. AGREEMENT SIGNATURES</SectionHeading>
 
         <p className={styles.bodyText}>
           The Participant and KALURA agree to the terms of this Agreement.
@@ -2806,8 +2786,8 @@ export default function ServiceAgreement({
           </table>
         </div>
         </div>
-      </fieldset>
 
+      </fieldset>
       <footer className={styles.footer}>
         <span>Service Agreement v1.1</span>
         <span>KALURA</span>
