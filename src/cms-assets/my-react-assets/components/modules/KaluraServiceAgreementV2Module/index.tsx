@@ -1,4 +1,4 @@
-// Kalura Service Agreement module V2
+// Kalura Service Agreement module V2 (participant edits Section 24 only)
 //
 // Purpose:
 // - Preserve the currently working HubSpot quote-editor behavior exactly.
@@ -8,7 +8,7 @@
 //   it queues the existing recall -> publish worker.
 //
 // Required HubSpot Quote property:
-//   kalura_service_agreement_data
+//   kalura_service_agreement_v2_data
 //
 // Property type:
 //   Multi-line text
@@ -40,7 +40,7 @@ export const hublDataTemplate = `
 
   {% if quoteId and not is_in_editor and not is_in_previewer and not isQuoteBlueprint %}
     {% set quoteRecord = crm_object("quote", quoteId) %}
-    {% set participantDataJson = quoteRecord.kalura_service_agreement_data|default("") %}
+    {% set participantDataJson = quoteRecord.kalura_service_agreement_v2_data|default("") %}
   {% else %}
     {% set participantDataJson = "" %}
   {% endif %}
@@ -145,7 +145,7 @@ export function Component({ fieldValues, hublData }: Props) {
           for (const [storedKey, value] of Object.entries(parsed)) {
             const fieldKey = keyMap[storedKey];
             if (fieldKey) {
-              normalized[fieldKey] = value as FieldValues[typeof fieldKey];
+              (normalized as Record<string, unknown>)[fieldKey] = value;
             }
           }
           publishedParticipantData = normalized;

@@ -71,6 +71,23 @@ export interface FieldValues {
   kaluraSigningName: string;
   kaluraSignature: string;
   kaluraDate: string;
+
+  // Section 24 (Participant Consent Form). Type-only: these are NOT HubSpot
+  // module fields. Participants fill them in; values are supplied at render
+  // time from the quote property kalura_service_agreement_v2_data.
+  consentPersonalInfo?: "yes" | "no" | "";
+  consentProviders?: "yes" | "no" | "";
+  consentResearch?: "yes" | "no" | "";
+  consentNdisPortal?: "yes" | "no" | "";
+  consentNdisPlan?: "yes" | "no" | "";
+  consentNdisPortion?: "yes" | "no" | "";
+  photoService?: "yes" | "no" | "";
+  photoMarketing?: "yes" | "no" | "";
+  photoPublications?: "yes" | "no" | "";
+  newsletter?: "yes" | "no" | "";
+  serviceOpportunities?: "yes" | "no" | "";
+  consentGiven?: boolean;
+  consentName?: string;
 }
 
 export const fields = (
