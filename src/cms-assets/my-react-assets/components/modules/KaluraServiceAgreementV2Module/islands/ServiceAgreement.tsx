@@ -1,4 +1,4 @@
-// Kalura Service Agreement module v1.6.5 (participant edits Section 24 only)
+// Kalura Service Agreement module v1.6.9-7col-longtext + participant Section 24 edit (v1.6.5 fix)
 import { useEffect, useRef, useState } from "react";
 import styles from "../ServiceAgreement.module.css";
 
@@ -17,10 +17,11 @@ interface YesNoProps {
   name: string;
   label: string;
   value: "yes" | "no" | "";
-  onChange: (value: "yes" | "no") => void;
+  onChange: (value: "yes" | "no" | "") => void;
+  allowUntick?: boolean;
 }
 
-function YesNo({ name, label, value, onChange }: YesNoProps) {
+function YesNo({ name, label, value, onChange, allowUntick = false }: YesNoProps) {
   return (
     <div className={styles.consentRow}>
       <div className={styles.consentQuestion}>{label}</div>
@@ -30,6 +31,12 @@ function YesNo({ name, label, value, onChange }: YesNoProps) {
           type="radio"
           name={name}
           checked={value === "yes"}
+          onClick={(event) => {
+            if (allowUntick && value === "yes") {
+              event.preventDefault();
+              onChange("");
+            }
+          }}
           onChange={() => onChange("yes")}
         />
         <span>Yes</span>
@@ -40,6 +47,12 @@ function YesNo({ name, label, value, onChange }: YesNoProps) {
           type="radio"
           name={name}
           checked={value === "no"}
+          onClick={(event) => {
+            if (allowUntick && value === "no") {
+              event.preventDefault();
+              onChange("");
+            }
+          }}
           onChange={() => onChange("no")}
         />
         <span>No</span>
@@ -105,6 +118,82 @@ function TextArea({
       value={value}
       rows={rows}
       onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
+/**
+ * Schedule-of-Supports cell editor.
+ *
+ * In the HubSpot editor, cells auto-grow as text is entered so the full value
+ * remains visible. In participant/PDF rendering, the value is rendered as a
+ * wrapping block instead of a fixed-height form control. This prevents long
+ * sentences from being clipped by PDF rendering.
+ */
+function SupportScheduleCell({
+  value,
+  onChange,
+  editable,
+  rows = 2,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  editable: boolean;
+  rows?: number;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const resize = () => {
+    const element = textareaRef.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (editable) resize();
+  }, [value, editable]);
+
+  if (!editable) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          minHeight: "42px",
+          boxSizing: "border-box",
+          padding: "5px",
+          fontSize: "10px",
+          lineHeight: 1.35,
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
+          overflow: "visible",
+        }}
+      >
+        {value || "\u00a0"}
+      </div>
+    );
+  }
+
+  return (
+    <textarea
+      ref={textareaRef}
+      className={styles.formTextarea}
+      value={value}
+      rows={rows}
+      onChange={(event) => onChange(event.target.value)}
+      onInput={resize}
+      style={{
+        width: "100%",
+        minHeight: "42px",
+        height: "auto",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        resize: "none",
+        whiteSpace: "pre-wrap",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+      }}
     />
   );
 }
@@ -215,6 +304,48 @@ export default function ServiceAgreement({
   serviceOpportunities: serviceOpportunitiesProp,
   consentGiven: consentGivenProp,
   consentName: consentNameProp,
+  supportItemNameNumber1: supportItemNameNumber1Prop,
+  supportItemDescription1: supportItemDescription1Prop,
+  supportServiceDayTimeLocation1: supportServiceDayTimeLocation1Prop,
+  supportFrequency1: supportFrequency1Prop,
+  supportPriceHour1: supportPriceHour1Prop,
+  supportQuantity1: supportQuantity1Prop,
+  supportTotalPrice1: supportTotalPrice1Prop,
+  supportItemNameNumber2: supportItemNameNumber2Prop,
+  supportItemDescription2: supportItemDescription2Prop,
+  supportServiceDayTimeLocation2: supportServiceDayTimeLocation2Prop,
+  supportFrequency2: supportFrequency2Prop,
+  supportPriceHour2: supportPriceHour2Prop,
+  supportQuantity2: supportQuantity2Prop,
+  supportTotalPrice2: supportTotalPrice2Prop,
+  supportItemNameNumber3: supportItemNameNumber3Prop,
+  supportItemDescription3: supportItemDescription3Prop,
+  supportServiceDayTimeLocation3: supportServiceDayTimeLocation3Prop,
+  supportFrequency3: supportFrequency3Prop,
+  supportPriceHour3: supportPriceHour3Prop,
+  supportQuantity3: supportQuantity3Prop,
+  supportTotalPrice3: supportTotalPrice3Prop,
+  supportItemNameNumber4: supportItemNameNumber4Prop,
+  supportItemDescription4: supportItemDescription4Prop,
+  supportServiceDayTimeLocation4: supportServiceDayTimeLocation4Prop,
+  supportFrequency4: supportFrequency4Prop,
+  supportPriceHour4: supportPriceHour4Prop,
+  supportQuantity4: supportQuantity4Prop,
+  supportTotalPrice4: supportTotalPrice4Prop,
+  supportItemNameNumber5: supportItemNameNumber5Prop,
+  supportItemDescription5: supportItemDescription5Prop,
+  supportServiceDayTimeLocation5: supportServiceDayTimeLocation5Prop,
+  supportFrequency5: supportFrequency5Prop,
+  supportPriceHour5: supportPriceHour5Prop,
+  supportQuantity5: supportQuantity5Prop,
+  supportTotalPrice5: supportTotalPrice5Prop,
+  supportItemNameNumber6: supportItemNameNumber6Prop,
+  supportItemDescription6: supportItemDescription6Prop,
+  supportServiceDayTimeLocation6: supportServiceDayTimeLocation6Prop,
+  supportFrequency6: supportFrequency6Prop,
+  supportPriceHour6: supportPriceHour6Prop,
+  supportQuantity6: supportQuantity6Prop,
+  supportTotalPrice6: supportTotalPrice6Prop,
   understanding: understandingProp,
   communicationUsed: communicationUsedProp,
   communicationDeclined: communicationDeclinedProp,
@@ -285,6 +416,50 @@ export default function ServiceAgreement({
   const [supportDescription3, setSupportDescription3] = useState(supportDescription3Prop || "");
   const [supportPrice3, setSupportPrice3] = useState(supportPrice3Prop || "");
   const [supportDelivery3, setSupportDelivery3] = useState(supportDelivery3Prop || "");
+
+  // Section 23 — 7 columns × 6 rows.
+  const [supportItemNameNumber1, setSupportItemNameNumber1] = useState(supportItemNameNumber1Prop || "");
+  const [supportItemDescription1, setSupportItemDescription1] = useState(supportItemDescription1Prop || "");
+  const [supportServiceDayTimeLocation1, setSupportServiceDayTimeLocation1] = useState(supportServiceDayTimeLocation1Prop || "");
+  const [supportFrequency1, setSupportFrequency1] = useState(supportFrequency1Prop || "");
+  const [supportPriceHour1, setSupportPriceHour1] = useState(supportPriceHour1Prop || "");
+  const [supportQuantity1, setSupportQuantity1] = useState(supportQuantity1Prop || "");
+  const [supportTotalPrice1, setSupportTotalPrice1] = useState(supportTotalPrice1Prop || "");
+  const [supportItemNameNumber2, setSupportItemNameNumber2] = useState(supportItemNameNumber2Prop || "");
+  const [supportItemDescription2, setSupportItemDescription2] = useState(supportItemDescription2Prop || "");
+  const [supportServiceDayTimeLocation2, setSupportServiceDayTimeLocation2] = useState(supportServiceDayTimeLocation2Prop || "");
+  const [supportFrequency2, setSupportFrequency2] = useState(supportFrequency2Prop || "");
+  const [supportPriceHour2, setSupportPriceHour2] = useState(supportPriceHour2Prop || "");
+  const [supportQuantity2, setSupportQuantity2] = useState(supportQuantity2Prop || "");
+  const [supportTotalPrice2, setSupportTotalPrice2] = useState(supportTotalPrice2Prop || "");
+  const [supportItemNameNumber3, setSupportItemNameNumber3] = useState(supportItemNameNumber3Prop || "");
+  const [supportItemDescription3, setSupportItemDescription3] = useState(supportItemDescription3Prop || "");
+  const [supportServiceDayTimeLocation3, setSupportServiceDayTimeLocation3] = useState(supportServiceDayTimeLocation3Prop || "");
+  const [supportFrequency3, setSupportFrequency3] = useState(supportFrequency3Prop || "");
+  const [supportPriceHour3, setSupportPriceHour3] = useState(supportPriceHour3Prop || "");
+  const [supportQuantity3, setSupportQuantity3] = useState(supportQuantity3Prop || "");
+  const [supportTotalPrice3, setSupportTotalPrice3] = useState(supportTotalPrice3Prop || "");
+  const [supportItemNameNumber4, setSupportItemNameNumber4] = useState(supportItemNameNumber4Prop || "");
+  const [supportItemDescription4, setSupportItemDescription4] = useState(supportItemDescription4Prop || "");
+  const [supportServiceDayTimeLocation4, setSupportServiceDayTimeLocation4] = useState(supportServiceDayTimeLocation4Prop || "");
+  const [supportFrequency4, setSupportFrequency4] = useState(supportFrequency4Prop || "");
+  const [supportPriceHour4, setSupportPriceHour4] = useState(supportPriceHour4Prop || "");
+  const [supportQuantity4, setSupportQuantity4] = useState(supportQuantity4Prop || "");
+  const [supportTotalPrice4, setSupportTotalPrice4] = useState(supportTotalPrice4Prop || "");
+  const [supportItemNameNumber5, setSupportItemNameNumber5] = useState(supportItemNameNumber5Prop || "");
+  const [supportItemDescription5, setSupportItemDescription5] = useState(supportItemDescription5Prop || "");
+  const [supportServiceDayTimeLocation5, setSupportServiceDayTimeLocation5] = useState(supportServiceDayTimeLocation5Prop || "");
+  const [supportFrequency5, setSupportFrequency5] = useState(supportFrequency5Prop || "");
+  const [supportPriceHour5, setSupportPriceHour5] = useState(supportPriceHour5Prop || "");
+  const [supportQuantity5, setSupportQuantity5] = useState(supportQuantity5Prop || "");
+  const [supportTotalPrice5, setSupportTotalPrice5] = useState(supportTotalPrice5Prop || "");
+  const [supportItemNameNumber6, setSupportItemNameNumber6] = useState(supportItemNameNumber6Prop || "");
+  const [supportItemDescription6, setSupportItemDescription6] = useState(supportItemDescription6Prop || "");
+  const [supportServiceDayTimeLocation6, setSupportServiceDayTimeLocation6] = useState(supportServiceDayTimeLocation6Prop || "");
+  const [supportFrequency6, setSupportFrequency6] = useState(supportFrequency6Prop || "");
+  const [supportPriceHour6, setSupportPriceHour6] = useState(supportPriceHour6Prop || "");
+  const [supportQuantity6, setSupportQuantity6] = useState(supportQuantity6Prop || "");
+  const [supportTotalPrice6, setSupportTotalPrice6] = useState(supportTotalPrice6Prop || "");
 
   // Section 24 — Participant Consent Form. Initial values come from the
   // published HubSpot quote property (via index.tsx) so the very first
@@ -426,6 +601,48 @@ export default function ServiceAgreement({
         setSupportDescription3(getSavedValue(data, "supportDescription3", supportDescription3Prop || ""));
         setSupportPrice3(getSavedValue(data, "supportPrice3", supportPrice3Prop || ""));
         setSupportDelivery3(getSavedValue(data, "supportDelivery3", supportDelivery3Prop || ""));
+        setSupportItemNameNumber1(getSavedValue(data, "supportItemNameNumber1", supportItemNameNumber1Prop || ""));
+        setSupportItemDescription1(getSavedValue(data, "supportItemDescription1", supportItemDescription1Prop || ""));
+        setSupportServiceDayTimeLocation1(getSavedValue(data, "supportServiceDayTimeLocation1", supportServiceDayTimeLocation1Prop || ""));
+        setSupportFrequency1(getSavedValue(data, "supportFrequency1", supportFrequency1Prop || ""));
+        setSupportPriceHour1(getSavedValue(data, "supportPriceHour1", supportPriceHour1Prop || ""));
+        setSupportQuantity1(getSavedValue(data, "supportQuantity1", supportQuantity1Prop || ""));
+        setSupportTotalPrice1(getSavedValue(data, "supportTotalPrice1", supportTotalPrice1Prop || ""));
+        setSupportItemNameNumber2(getSavedValue(data, "supportItemNameNumber2", supportItemNameNumber2Prop || ""));
+        setSupportItemDescription2(getSavedValue(data, "supportItemDescription2", supportItemDescription2Prop || ""));
+        setSupportServiceDayTimeLocation2(getSavedValue(data, "supportServiceDayTimeLocation2", supportServiceDayTimeLocation2Prop || ""));
+        setSupportFrequency2(getSavedValue(data, "supportFrequency2", supportFrequency2Prop || ""));
+        setSupportPriceHour2(getSavedValue(data, "supportPriceHour2", supportPriceHour2Prop || ""));
+        setSupportQuantity2(getSavedValue(data, "supportQuantity2", supportQuantity2Prop || ""));
+        setSupportTotalPrice2(getSavedValue(data, "supportTotalPrice2", supportTotalPrice2Prop || ""));
+        setSupportItemNameNumber3(getSavedValue(data, "supportItemNameNumber3", supportItemNameNumber3Prop || ""));
+        setSupportItemDescription3(getSavedValue(data, "supportItemDescription3", supportItemDescription3Prop || ""));
+        setSupportServiceDayTimeLocation3(getSavedValue(data, "supportServiceDayTimeLocation3", supportServiceDayTimeLocation3Prop || ""));
+        setSupportFrequency3(getSavedValue(data, "supportFrequency3", supportFrequency3Prop || ""));
+        setSupportPriceHour3(getSavedValue(data, "supportPriceHour3", supportPriceHour3Prop || ""));
+        setSupportQuantity3(getSavedValue(data, "supportQuantity3", supportQuantity3Prop || ""));
+        setSupportTotalPrice3(getSavedValue(data, "supportTotalPrice3", supportTotalPrice3Prop || ""));
+        setSupportItemNameNumber4(getSavedValue(data, "supportItemNameNumber4", supportItemNameNumber4Prop || ""));
+        setSupportItemDescription4(getSavedValue(data, "supportItemDescription4", supportItemDescription4Prop || ""));
+        setSupportServiceDayTimeLocation4(getSavedValue(data, "supportServiceDayTimeLocation4", supportServiceDayTimeLocation4Prop || ""));
+        setSupportFrequency4(getSavedValue(data, "supportFrequency4", supportFrequency4Prop || ""));
+        setSupportPriceHour4(getSavedValue(data, "supportPriceHour4", supportPriceHour4Prop || ""));
+        setSupportQuantity4(getSavedValue(data, "supportQuantity4", supportQuantity4Prop || ""));
+        setSupportTotalPrice4(getSavedValue(data, "supportTotalPrice4", supportTotalPrice4Prop || ""));
+        setSupportItemNameNumber5(getSavedValue(data, "supportItemNameNumber5", supportItemNameNumber5Prop || ""));
+        setSupportItemDescription5(getSavedValue(data, "supportItemDescription5", supportItemDescription5Prop || ""));
+        setSupportServiceDayTimeLocation5(getSavedValue(data, "supportServiceDayTimeLocation5", supportServiceDayTimeLocation5Prop || ""));
+        setSupportFrequency5(getSavedValue(data, "supportFrequency5", supportFrequency5Prop || ""));
+        setSupportPriceHour5(getSavedValue(data, "supportPriceHour5", supportPriceHour5Prop || ""));
+        setSupportQuantity5(getSavedValue(data, "supportQuantity5", supportQuantity5Prop || ""));
+        setSupportTotalPrice5(getSavedValue(data, "supportTotalPrice5", supportTotalPrice5Prop || ""));
+        setSupportItemNameNumber6(getSavedValue(data, "supportItemNameNumber6", supportItemNameNumber6Prop || ""));
+        setSupportItemDescription6(getSavedValue(data, "supportItemDescription6", supportItemDescription6Prop || ""));
+        setSupportServiceDayTimeLocation6(getSavedValue(data, "supportServiceDayTimeLocation6", supportServiceDayTimeLocation6Prop || ""));
+        setSupportFrequency6(getSavedValue(data, "supportFrequency6", supportFrequency6Prop || ""));
+        setSupportPriceHour6(getSavedValue(data, "supportPriceHour6", supportPriceHour6Prop || ""));
+        setSupportQuantity6(getSavedValue(data, "supportQuantity6", supportQuantity6Prop || ""));
+        setSupportTotalPrice6(getSavedValue(data, "supportTotalPrice6", supportTotalPrice6Prop || ""));
         const loaded24: Section24Values = {
           consentPersonalInfo: getSavedValue(data, "consentPersonalInfo", consentPersonalInfoProp || "") as YesNoValue,
           consentProviders: getSavedValue(data, "consentProviders", consentProvidersProp || "") as YesNoValue,
@@ -500,7 +717,16 @@ export default function ServiceAgreement({
       // Participants may only change Section 24. Never save before the load has
       // produced a baseline, and never save when nothing changed.
       if (section24Synced.current === null) return;
-      if (JSON.stringify(section24Data) === section24Synced.current) return;
+      if (JSON.stringify(section24Data) === section24Synced.current) {
+        // The participant undid a change before it was sent (e.g. ticked and
+        // then unticked): drop the stale pending save and clear the banner.
+        if (pendingSave.current) {
+          pendingSave.current = null;
+          setSyncStatus("ready");
+          setSyncMessage("✓ Saved. Your changes will appear in the signing document.");
+        }
+        return;
+      }
     } else if (skipNextSave.current) {
       skipNextSave.current = false;
       return;
@@ -548,6 +774,24 @@ export default function ServiceAgreement({
       supportDescription3,
       supportPrice3,
       supportDelivery3,
+      supportItemNameNumber1, supportItemDescription1,
+      supportServiceDayTimeLocation1, supportFrequency1,
+      supportPriceHour1, supportQuantity1, supportTotalPrice1,
+      supportItemNameNumber2, supportItemDescription2,
+      supportServiceDayTimeLocation2, supportFrequency2,
+      supportPriceHour2, supportQuantity2, supportTotalPrice2,
+      supportItemNameNumber3, supportItemDescription3,
+      supportServiceDayTimeLocation3, supportFrequency3,
+      supportPriceHour3, supportQuantity3, supportTotalPrice3,
+      supportItemNameNumber4, supportItemDescription4,
+      supportServiceDayTimeLocation4, supportFrequency4,
+      supportPriceHour4, supportQuantity4, supportTotalPrice4,
+      supportItemNameNumber5, supportItemDescription5,
+      supportServiceDayTimeLocation5, supportFrequency5,
+      supportPriceHour5, supportQuantity5, supportTotalPrice5,
+      supportItemNameNumber6, supportItemDescription6,
+      supportServiceDayTimeLocation6, supportFrequency6,
+      supportPriceHour6, supportQuantity6, supportTotalPrice6,
       consentPersonalInfo,
       consentProviders,
       consentResearch,
@@ -665,6 +909,24 @@ export default function ServiceAgreement({
     supportItem1, supportDescription1, supportPrice1, supportDelivery1,
     supportItem2, supportDescription2, supportPrice2, supportDelivery2,
     supportItem3, supportDescription3, supportPrice3, supportDelivery3,
+    supportItemNameNumber1, supportItemDescription1,
+    supportServiceDayTimeLocation1, supportFrequency1,
+    supportPriceHour1, supportQuantity1, supportTotalPrice1,
+    supportItemNameNumber2, supportItemDescription2,
+    supportServiceDayTimeLocation2, supportFrequency2,
+    supportPriceHour2, supportQuantity2, supportTotalPrice2,
+    supportItemNameNumber3, supportItemDescription3,
+    supportServiceDayTimeLocation3, supportFrequency3,
+    supportPriceHour3, supportQuantity3, supportTotalPrice3,
+    supportItemNameNumber4, supportItemDescription4,
+    supportServiceDayTimeLocation4, supportFrequency4,
+    supportPriceHour4, supportQuantity4, supportTotalPrice4,
+    supportItemNameNumber5, supportItemDescription5,
+    supportServiceDayTimeLocation5, supportFrequency5,
+    supportPriceHour5, supportQuantity5, supportTotalPrice5,
+    supportItemNameNumber6, supportItemDescription6,
+    supportServiceDayTimeLocation6, supportFrequency6,
+    supportPriceHour6, supportQuantity6, supportTotalPrice6,
     consentPersonalInfo, consentProviders, consentResearch, consentNdisPortal,
     consentNdisPlan, consentNdisPortion, photoService, photoMarketing, photoPublications,
     newsletter, serviceOpportunities, consentGiven, consentName,
@@ -1417,12 +1679,13 @@ export default function ServiceAgreement({
 
       <BulletList>
         <li>
-          the Participant cancels a support delivered by a disability support
-          worker with less than seven (7) days’ notice;
+          the Participant cancels a support delivered by a Disability Support
+          Worker with less than seven (7) days’ notice;
         </li>
         <li>
-          the Participant cancels any other support with less than two (2) clear
-          Business Days’ notice; or
+	  the Participant cancels a scheduled support that is not delivered by 
+          a Disability Support Worker, including therapy services, with less 
+          than two (2) clear Business Days' notice; or
         </li>
         <li>
           the Participant does not attend a scheduled support within a
@@ -2098,97 +2361,88 @@ export default function ServiceAgreement({
 
         <SubHeading>Agreed supports and prices</SubHeading>
 
-        <table className={styles.supportsTable}>
+        <table
+          className={styles.supportsTable}
+          style={{
+            width: "100%",
+            tableLayout: "fixed",
+            borderCollapse: "collapse",
+          }}
+        >
+          <colgroup>
+            <col style={{ width: "17.67%" }} />
+            <col style={{ width: "16.68%" }} />
+            <col style={{ width: "15.70%" }} />
+            <col style={{ width: "15.70%" }} />
+            <col style={{ width: "11.78%" }} />
+            <col style={{ width: "9.82%" }} />
+            <col style={{ width: "18%" }} />
+          </colgroup>
           <thead>
             <tr>
-              <th>Support item</th>
-              <th>Description (scope and volume)</th>
-              <th>Price and payment information</th>
-              <th>How, when and where provided</th>
+              <th>Support Item Name and Number</th>
+              <th>Support Item Description</th>
+              <th>Service Day, Time and Location</th>
+              <th>Frequency/Service Arrangement</th>
+              <th>Price per Hour</th>
+              <th>Quantity</th>
+              <th>Total Price</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr>
-              <td>
-                <TextInput value={supportItem1} onChange={setSupportItem1} />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDescription1}
-                  onChange={setSupportDescription1}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportPrice1}
-                  onChange={setSupportPrice1}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDelivery1}
-                  onChange={setSupportDelivery1}
-                  rows={3}
-                />
-              </td>
-            </tr>
+            {[1, 2, 3, 4, 5, 6].map((rowNumber) => {
+              const values = {
+                1: [supportItemNameNumber1, supportItemDescription1, supportServiceDayTimeLocation1, supportFrequency1, supportPriceHour1, supportQuantity1, supportTotalPrice1],
+                2: [supportItemNameNumber2, supportItemDescription2, supportServiceDayTimeLocation2, supportFrequency2, supportPriceHour2, supportQuantity2, supportTotalPrice2],
+                3: [supportItemNameNumber3, supportItemDescription3, supportServiceDayTimeLocation3, supportFrequency3, supportPriceHour3, supportQuantity3, supportTotalPrice3],
+                4: [supportItemNameNumber4, supportItemDescription4, supportServiceDayTimeLocation4, supportFrequency4, supportPriceHour4, supportQuantity4, supportTotalPrice4],
+                5: [supportItemNameNumber5, supportItemDescription5, supportServiceDayTimeLocation5, supportFrequency5, supportPriceHour5, supportQuantity5, supportTotalPrice5],
+                6: [supportItemNameNumber6, supportItemDescription6, supportServiceDayTimeLocation6, supportFrequency6, supportPriceHour6, supportQuantity6, supportTotalPrice6],
+              }[rowNumber];
 
-            <tr>
-              <td>
-                <TextInput value={supportItem2} onChange={setSupportItem2} />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDescription2}
-                  onChange={setSupportDescription2}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportPrice2}
-                  onChange={setSupportPrice2}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDelivery2}
-                  onChange={setSupportDelivery2}
-                  rows={3}
-                />
-              </td>
-            </tr>
+              const setters = {
+                1: [setSupportItemNameNumber1, setSupportItemDescription1, setSupportServiceDayTimeLocation1, setSupportFrequency1, setSupportPriceHour1, setSupportQuantity1, setSupportTotalPrice1],
+                2: [setSupportItemNameNumber2, setSupportItemDescription2, setSupportServiceDayTimeLocation2, setSupportFrequency2, setSupportPriceHour2, setSupportQuantity2, setSupportTotalPrice2],
+                3: [setSupportItemNameNumber3, setSupportItemDescription3, setSupportServiceDayTimeLocation3, setSupportFrequency3, setSupportPriceHour3, setSupportQuantity3, setSupportTotalPrice3],
+                4: [setSupportItemNameNumber4, setSupportItemDescription4, setSupportServiceDayTimeLocation4, setSupportFrequency4, setSupportPriceHour4, setSupportQuantity4, setSupportTotalPrice4],
+                5: [setSupportItemNameNumber5, setSupportItemDescription5, setSupportServiceDayTimeLocation5, setSupportFrequency5, setSupportPriceHour5, setSupportQuantity5, setSupportTotalPrice5],
+                6: [setSupportItemNameNumber6, setSupportItemDescription6, setSupportServiceDayTimeLocation6, setSupportFrequency6, setSupportPriceHour6, setSupportQuantity6, setSupportTotalPrice6],
+              }[rowNumber];
 
-            <tr>
-              <td>
-                <TextInput value={supportItem3} onChange={setSupportItem3} />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDescription3}
-                  onChange={setSupportDescription3}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportPrice3}
-                  onChange={setSupportPrice3}
-                  rows={3}
-                />
-              </td>
-              <td>
-                <TextArea
-                  value={supportDelivery3}
-                  onChange={setSupportDelivery3}
-                  rows={3}
-                />
-              </td>
-            </tr>
+              return (
+                <tr
+                  key={rowNumber}
+                  style={{
+                    height: "auto",
+                    breakInside: "auto",
+                    pageBreakInside: "auto",
+                  }}
+                >
+                  {values.map((value, columnIndex) => (
+                    <td
+                      key={columnIndex}
+                      style={{
+                        padding: "3px",
+                        verticalAlign: "top",
+                        height: "auto",
+                        minHeight: "48px",
+                        overflow: "visible",
+                        whiteSpace: "normal",
+                        overflowWrap: "anywhere",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      <SupportScheduleCell
+                        value={value}
+                        onChange={setters[columnIndex]}
+                        editable={Boolean(isInEditor)}
+                        rows={2}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -2206,6 +2460,7 @@ export default function ServiceAgreement({
             label="Non-face-to-face supports (see Claiming for Non-Face-to-Face Supports)"
             value={claimNonFace}
             onChange={setClaimNonFace}
+            allowUntick
           />
 
           <YesNo
@@ -2213,6 +2468,7 @@ export default function ServiceAgreement({
             label="Provider travel: labour time (see Claiming for Provider Travel)"
             value={claimTravelLabour}
             onChange={setClaimTravelLabour}
+            allowUntick
           />
 
           <YesNo
@@ -2220,6 +2476,7 @@ export default function ServiceAgreement({
             label="Provider travel: non-labour costs, including any agreed contribution per kilometre (see Claiming for Provider Travel)"
             value={claimTravelNonLabour}
             onChange={setClaimTravelNonLabour}
+            allowUntick
           />
 
           <YesNo
@@ -2227,6 +2484,7 @@ export default function ServiceAgreement({
             label="Short Notice Cancellation terms (see Short Notice Cancellations)"
             value={claimCancellation}
             onChange={setClaimCancellation}
+            allowUntick
           />
 
           <YesNo
@@ -2234,6 +2492,7 @@ export default function ServiceAgreement({
             label="NDIA Requested Reports (see NDIA Requested Reports)"
             value={claimReports}
             onChange={setClaimReports}
+            allowUntick
           />
         </div>
 
@@ -2254,16 +2513,18 @@ export default function ServiceAgreement({
           <tbody>
             <tr>
               <td>
-                <TextArea
+                <SupportScheduleCell
                   value={conditions}
                   onChange={setConditions}
+                  editable={Boolean(isInEditor)}
                   rows={4}
                 />
               </td>
               <td>
-                <TextArea
+                <SupportScheduleCell
                   value={conditionReasons}
                   onChange={setConditionReasons}
+                  editable={Boolean(isInEditor)}
                   rows={4}
                 />
               </td>
@@ -2291,16 +2552,28 @@ export default function ServiceAgreement({
           <tbody>
             <tr>
               <td>
-                <TextInput
+                <SupportScheduleCell
                   value={fundingComponent}
                   onChange={setFundingComponent}
+                  editable={Boolean(isInEditor)}
+                  rows={2}
                 />
               </td>
               <td>
-                <TextInput value={fundingDates} onChange={setFundingDates} />
+                <SupportScheduleCell
+                  value={fundingDates}
+                  onChange={setFundingDates}
+                  editable={Boolean(isInEditor)}
+                  rows={2}
+                />
               </td>
               <td>
-                <TextArea value={fundingNotes} onChange={setFundingNotes} />
+                <SupportScheduleCell
+                  value={fundingNotes}
+                  onChange={setFundingNotes}
+                  editable={Boolean(isInEditor)}
+                  rows={3}
+                />
               </td>
             </tr>
           </tbody>
@@ -2382,6 +2655,7 @@ export default function ServiceAgreement({
             label="Collect, use, and store my personal information to provide services"
             value={consentPersonalInfo}
             onChange={setConsentPersonalInfo}
+            allowUntick
           />
 
           <YesNo
@@ -2389,6 +2663,7 @@ export default function ServiceAgreement({
             label="Share my personal information with service providers (except as specified below)"
             value={consentProviders}
             onChange={setConsentProviders}
+            allowUntick
           />
 
           <YesNo
@@ -2396,6 +2671,7 @@ export default function ServiceAgreement({
             label="Use my de-identified information for research, analysis, and reporting"
             value={consentResearch}
             onChange={setConsentResearch}
+            allowUntick
           />
 
           <YesNo
@@ -2403,6 +2679,7 @@ export default function ServiceAgreement({
             label="Access my personal information on the NDIS Portal"
             value={consentNdisPortal}
             onChange={setConsentNdisPortal}
+            allowUntick
           />
 
           <YesNo
@@ -2410,6 +2687,7 @@ export default function ServiceAgreement({
             label="Access a copy of my NDIS Plan from the NDIA or its agents"
             value={consentNdisPlan}
             onChange={setConsentNdisPlan}
+            allowUntick
           />
 
           <YesNo
@@ -2417,6 +2695,7 @@ export default function ServiceAgreement({
             label="Access the portion of my NDIS Plan that relates to KALURA-provided supports"
             value={consentNdisPortion}
             onChange={setConsentNdisPortion}
+            allowUntick
           />
         </div>
 
@@ -2453,6 +2732,7 @@ export default function ServiceAgreement({
             label="Take and use photographs and videos of me for service delivery purposes (if applicable)."
             value={photoService}
             onChange={setPhotoService}
+            allowUntick
           />
 
           <YesNo
@@ -2460,6 +2740,7 @@ export default function ServiceAgreement({
             label="Take and use photographs and videos of me for marketing and promotional materials."
             value={photoMarketing}
             onChange={setPhotoMarketing}
+            allowUntick
           />
 
           <YesNo
@@ -2467,6 +2748,7 @@ export default function ServiceAgreement({
             label="use my image in printed materials, online publications, or social media platforms."
             value={photoPublications}
             onChange={setPhotoPublications}
+            allowUntick
           />
         </div>
 
@@ -2496,6 +2778,7 @@ export default function ServiceAgreement({
             label="Send me information about services via a Newsletter."
             value={newsletter}
             onChange={setNewsletter}
+            allowUntick
           />
 
           <YesNo
@@ -2503,6 +2786,7 @@ export default function ServiceAgreement({
             label="Contact me to advise me of service-related opportunities."
             value={serviceOpportunities}
             onChange={setServiceOpportunities}
+            allowUntick
           />
         </div>
 
@@ -2690,12 +2974,11 @@ export default function ServiceAgreement({
               </tr>
 
               <tr>
-                <th>Date</th>
+                <th>Email</th>
                 <td>
                   <TextInput
                     value={participantSigningDate}
                     onChange={setParticipantSigningDate}
-                    placeholder="DD/MM/YYYY"
                   />
                 </td>
               </tr>
@@ -2719,12 +3002,11 @@ export default function ServiceAgreement({
               </tr>
 
               <tr>
-                <th>Date</th>
+                <th>Email</th>
                 <td>
                   <TextInput
                     value={representativeDate}
                     onChange={setRepresentativeDate}
-                    placeholder="DD/MM/YYYY"
                   />
                 </td>
               </tr>
@@ -2786,7 +3068,6 @@ export default function ServiceAgreement({
           </table>
         </div>
         </div>
-
       </fieldset>
       <footer className={styles.footer}>
         <span>Service Agreement v1.1</span>
