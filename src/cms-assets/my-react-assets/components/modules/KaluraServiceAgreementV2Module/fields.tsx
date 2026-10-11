@@ -88,6 +88,51 @@ export interface FieldValues {
   serviceOpportunities?: "yes" | "no" | "";
   consentGiven?: boolean;
   consentName?: string;
+
+  // Section 23 (Schedule of Supports, 7 columns x 6 rows). Type-only, like
+  // Section 24: values arrive from the quote property at render time.
+  supportItemNameNumber1?: string;
+  supportItemDescription1?: string;
+  supportServiceDayTimeLocation1?: string;
+  supportFrequency1?: string;
+  supportPriceHour1?: string;
+  supportQuantity1?: string;
+  supportTotalPrice1?: string;
+  supportItemNameNumber2?: string;
+  supportItemDescription2?: string;
+  supportServiceDayTimeLocation2?: string;
+  supportFrequency2?: string;
+  supportPriceHour2?: string;
+  supportQuantity2?: string;
+  supportTotalPrice2?: string;
+  supportItemNameNumber3?: string;
+  supportItemDescription3?: string;
+  supportServiceDayTimeLocation3?: string;
+  supportFrequency3?: string;
+  supportPriceHour3?: string;
+  supportQuantity3?: string;
+  supportTotalPrice3?: string;
+  supportItemNameNumber4?: string;
+  supportItemDescription4?: string;
+  supportServiceDayTimeLocation4?: string;
+  supportFrequency4?: string;
+  supportPriceHour4?: string;
+  supportQuantity4?: string;
+  supportTotalPrice4?: string;
+  supportItemNameNumber5?: string;
+  supportItemDescription5?: string;
+  supportServiceDayTimeLocation5?: string;
+  supportFrequency5?: string;
+  supportPriceHour5?: string;
+  supportQuantity5?: string;
+  supportTotalPrice5?: string;
+  supportItemNameNumber6?: string;
+  supportItemDescription6?: string;
+  supportServiceDayTimeLocation6?: string;
+  supportFrequency6?: string;
+  supportPriceHour6?: string;
+  supportQuantity6?: string;
+  supportTotalPrice6?: string;
 }
 
 export const fields = (
