@@ -241,11 +241,48 @@ function AutoGrowTextArea({
       style={{
         width: "100%",
         boxSizing: "border-box",
+        padding: "8px",
+        border: "1px solid #1f2937",
+        borderRadius: "2px",
+        background: "#ffffff",
         overflow: "hidden",
         resize: "none",
         whiteSpace: "pre-wrap",
         overflowWrap: "anywhere",
         wordBreak: "break-word",
+      }}
+    />
+  );
+}
+
+/**
+ * Single-line entry shown as a short underline (a "write here" line).
+ */
+function LineInput({
+  value,
+  onChange,
+  width = "240px",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  width?: string;
+}) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      style={{
+        width,
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        padding: "2px 4px",
+        border: "none",
+        borderBottom: "1px solid #1f2937",
+        borderRadius: 0,
+        background: "transparent",
+        outline: "none",
+        font: "inherit",
       }}
     />
   );
@@ -3043,17 +3080,13 @@ export default function ServiceAgreement({
         </p>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", margin: "0 0 10px" }}>
-          <div style={{ flex: "1 1 280px" }}>
-            <TextInput value={verbalConsentName} onChange={setVerbalConsentName} />
-          </div>
+          <LineInput value={verbalConsentName} onChange={setVerbalConsentName} />
           <span className={styles.bodyText}>[Insert Name], who is</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", margin: "0 0 10px" }}>
           <span className={styles.bodyText}>the</span>
-          <div style={{ flex: "1 1 280px" }}>
-            <TextInput value={verbalConsentRelationship} onChange={setVerbalConsentRelationship} />
-          </div>
+          <LineInput value={verbalConsentRelationship} onChange={setVerbalConsentRelationship} />
           <span className={styles.bodyText}>[Relationship to Participant].</span>
         </div>
 
