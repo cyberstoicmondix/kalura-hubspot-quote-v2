@@ -198,6 +198,59 @@ function SupportScheduleCell({
   );
 }
 
+/**
+ * Multi-line box that grows with its content. Rows are estimated from the text
+ * so the server-rendered / signing-document version is already tall enough;
+ * in the browser the height is then set exactly from the content.
+ */
+function AutoGrowTextArea({
+  value,
+  onChange,
+  minRows = 6,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  minRows?: number;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  const resize = () => {
+    const element = ref.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    resize();
+  }, [value]);
+
+  const estimatedRows = Math.max(
+    minRows,
+    value.split("\n").reduce((total, line) => total + Math.max(1, Math.ceil(line.length / 95)), 0)
+  );
+
+  return (
+    <textarea
+      ref={ref}
+      className={styles.formTextarea}
+      value={value}
+      rows={estimatedRows}
+      onChange={(event) => onChange(event.target.value)}
+      onInput={resize}
+      style={{
+        width: "100%",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        resize: "none",
+        whiteSpace: "pre-wrap",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+      }}
+    />
+  );
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h2 className={styles.sectionHeading}>{children}</h2>;
 }
@@ -227,6 +280,7 @@ interface Section24Values {
   serviceOpportunities: YesNoValue;
   consentGiven: boolean;
   consentName: string;
+  consentExceptions: string;
 }
 
 /**
@@ -249,6 +303,7 @@ function toSection24Payload(values: Section24Values) {
     serviceOpportunities: values.serviceOpportunities,
     consentgiven: values.consentGiven,
     consentname: values.consentName,
+    consentexceptions: values.consentExceptions,
   };
 }
 
@@ -304,6 +359,10 @@ export default function ServiceAgreement({
   serviceOpportunities: serviceOpportunitiesProp,
   consentGiven: consentGivenProp,
   consentName: consentNameProp,
+  consentExceptions: consentExceptionsProp,
+  verbalConsentName: verbalConsentNameProp,
+  verbalConsentRelationship: verbalConsentRelationshipProp,
+  kaluraRepresentativeName: kaluraRepresentativeNameProp,
   supportItemNameNumber1: supportItemNameNumber1Prop,
   supportItemDescription1: supportItemDescription1Prop,
   supportServiceDayTimeLocation1: supportServiceDayTimeLocation1Prop,
@@ -480,6 +539,12 @@ export default function ServiceAgreement({
 
   const [consentGiven, setConsentGiven] = useState(Boolean(consentGivenProp));
   const [consentName, setConsentName] = useState(consentNameProp || "");
+  const [consentExceptions, setConsentExceptions] = useState(consentExceptionsProp || "");
+
+  // Section 24 — KALURA use only (editor-filled; read-only for participants).
+  const [verbalConsentName, setVerbalConsentName] = useState(verbalConsentNameProp || "");
+  const [verbalConsentRelationship, setVerbalConsentRelationship] = useState(verbalConsentRelationshipProp || "");
+  const [kaluraRepresentativeName, setKaluraRepresentativeName] = useState(kaluraRepresentativeNameProp || "");
 
   const [understanding, setUnderstanding] = useState(Boolean(understandingProp));
   const [communicationUsed, setCommunicationUsed] = useState(Boolean(communicationUsedProp));
@@ -657,6 +722,7 @@ export default function ServiceAgreement({
           serviceOpportunities: getSavedValue(data, "serviceOpportunities", serviceOpportunitiesProp || "") as YesNoValue,
           consentGiven: Boolean(getSavedValue(data, "consentgiven", Boolean(consentGivenProp))),
           consentName: getSavedValue(data, "consentname", consentNameProp || ""),
+          consentExceptions: getSavedValue(data, "consentexceptions", consentExceptionsProp || ""),
         };
         setConsentPersonalInfo(loaded24.consentPersonalInfo);
         setConsentProviders(loaded24.consentProviders);
@@ -671,6 +737,7 @@ export default function ServiceAgreement({
         setServiceOpportunities(loaded24.serviceOpportunities);
         setConsentGiven(loaded24.consentGiven);
         setConsentName(loaded24.consentName);
+        setConsentExceptions(loaded24.consentExceptions);
         // Baseline for change detection: participants only save when Section 24
         // differs from what the server already holds.
         section24Synced.current = JSON.stringify(toSection24Payload(loaded24));
@@ -686,6 +753,9 @@ export default function ServiceAgreement({
         setKaluraSigningName(getSavedValue(data, "kaluraSigningName", kaluraSigningNameProp || ""));
         setKaluraSignature(getSavedValue(data, "kaluraSignature", kaluraSignatureProp || ""));
         setKaluraDate(getSavedValue(data, "kaluraDate", kaluraDateProp || ""));
+        setVerbalConsentName(getSavedValue(data, "verbalConsentName", verbalConsentNameProp || ""));
+        setVerbalConsentRelationship(getSavedValue(data, "verbalConsentRelationship", verbalConsentRelationshipProp || ""));
+        setKaluraRepresentativeName(getSavedValue(data, "kaluraRepresentativeName", kaluraRepresentativeNameProp || ""));
 
         hasLoadedAgreement.current = true;
         skipNextSave.current = true;
@@ -711,6 +781,7 @@ export default function ServiceAgreement({
       consentPersonalInfo, consentProviders, consentResearch, consentNdisPortal,
       consentNdisPlan, consentNdisPortion, photoService, photoMarketing,
       photoPublications, newsletter, serviceOpportunities, consentGiven, consentName,
+      consentExceptions,
     });
 
     if (isParticipantMode) {
@@ -805,6 +876,7 @@ export default function ServiceAgreement({
       serviceOpportunities,
       consentgiven: consentGiven,
       consentname: consentName,
+      consentexceptions: consentExceptions,
       understanding,
       communicationUsed,
       communicationDeclined,
@@ -817,6 +889,9 @@ export default function ServiceAgreement({
       kaluraSigningName,
       kaluraSignature,
       kaluraDate,
+      verbalConsentName,
+      verbalConsentRelationship,
+      kaluraRepresentativeName,
     };
 
     const payload = isParticipantMode ? section24Data : agreementData;
@@ -929,10 +1004,11 @@ export default function ServiceAgreement({
     supportPriceHour6, supportQuantity6, supportTotalPrice6,
     consentPersonalInfo, consentProviders, consentResearch, consentNdisPortal,
     consentNdisPlan, consentNdisPortion, photoService, photoMarketing, photoPublications,
-    newsletter, serviceOpportunities, consentGiven, consentName,
+    newsletter, serviceOpportunities, consentGiven, consentName, consentExceptions,
     understanding, communicationUsed, communicationDeclined, communicationNotRequired,
     independentAdvice, participantSigningName, participantSigningDate,
     representativeName, representativeDate, kaluraSigningName, kaluraSignature, kaluraDate,
+    verbalConsentName, verbalConsentRelationship, kaluraRepresentativeName,
   ]);
 
   // Participants: if the page is hidden/closed (e.g. Sign now navigates away)
@@ -2585,8 +2661,8 @@ export default function ServiceAgreement({
           24. PARTICIPANT CONSENT FORM
           ================================================================ */}
 
-      <fieldset disabled={isInEditor || loadFailed} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <div className={styles.majorSection}>
+      <fieldset disabled={isInEditor || loadFailed} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <SectionHeading>24. PARTICIPANT CONSENT FORM</SectionHeading>
 
         <SubHeading>Purpose of this Consent Form</SubHeading>
@@ -2641,6 +2717,48 @@ export default function ServiceAgreement({
           have any concerns regarding how your information is managed, you are
           encouraged to contact KALURA for further clarification.
         </p>
+        
+        
+        <SubHeading>What is Personal Information?</SubHeading>
+	<p className={styles.bodyText}>
+	 Personal Information includes, but is not limited to:
+        </p>
+        <BulletList>
+          <li>Name and contact details</li>
+          <li>Health and medical records</li>
+          <li>NDIS plan details, re-assessments, and supporting documentation</li>
+          <li>Information related to safety, well-being, and risk assessments</li>
+          <li>Sensitive data (e.g., racial or ethnic background, legal history)</li>
+        </BulletList>
+        
+        <SubHeading>Collection and Use of Personal Information:</SubHeading>
+        <p className={styles.bodyText}>
+         KALURA will use your personal information solely to provide and manage the services you
+	 require. This may include:
+        </p>
+        <BulletList>
+          <li>Assessing and delivering your supports</li>
+          <li>Internal business functions (e.g., risk management, service improvement)</li>
+          <li>Meeting legal and regulatory requirements</li>
+        </BulletList>
+        
+         <p className={styles.bodyText}>
+   	 Your personal information may be shared with:
+        </p>
+        <BulletList>
+          <li>Healthcare providers (hospitals, GPs, pharmacies)</li>
+          <li>Legal representatives</li>
+          <li>Government agencies, including the NDIS Quality and Safeguards Commission and Medicare</li>
+          <li>Housing, education, and social support services</li>
+          <li>IT service providers assisting with data management</li>
+        </BulletList>
+        
+        <p className={styles.bodyText}>
+   	 KALURA may also need to access your information via the NDIS Portal to facilitate support.
+	 While you are not required to provide your full NDIS plan, refusing to share key details may
+	 impact the services KALURA can offer.
+        </p>
+        
 
         <SubHeading>Your Consent</SubHeading>
 
@@ -2676,7 +2794,7 @@ export default function ServiceAgreement({
 
           <YesNo
             name="consentNdisPortal"
-            label="Access my personal information on the NDIS Portal"
+            label="Access my information on the NDIS Portal where required for service bookings"
             value={consentNdisPortal}
             onChange={setConsentNdisPortal}
             allowUntick
@@ -2698,6 +2816,19 @@ export default function ServiceAgreement({
             allowUntick
           />
         </div>
+
+        <SubHeading>Exceptions</SubHeading>
+
+        <p className={styles.bodyText}>
+          List any individuals or organisations you do not consent to share
+          information with:
+        </p>
+
+        <AutoGrowTextArea
+          value={consentExceptions}
+          onChange={setConsentExceptions}
+          minRows={6}
+        />
 
         <SubHeading>Verbal Consent</SubHeading>
 
@@ -2729,7 +2860,7 @@ export default function ServiceAgreement({
         <div className={styles.consentTable}>
           <YesNo
             name="photoService"
-            label="Take and use photographs and videos of me for service delivery purposes (if applicable)."
+            label="Take and use photographs or videos of me where appropriate to support the delivery of my services and supports."
             value={photoService}
             onChange={setPhotoService}
             allowUntick
@@ -2737,7 +2868,7 @@ export default function ServiceAgreement({
 
           <YesNo
             name="photoMarketing"
-            label="Take and use photographs and videos of me for marketing and promotional materials."
+            label="Capture and share photographs or videos of me for purposes such as celebrating achievements, sharing participant stories,and promoting Kalura’s services."
             value={photoMarketing}
             onChange={setPhotoMarketing}
             allowUntick
@@ -2745,7 +2876,7 @@ export default function ServiceAgreement({
 
           <YesNo
             name="photoPublications"
-            label="use my image in printed materials, online publications, or social media platforms."
+            label="Share my photograph or image in printed materials, online publications, or social media, in accordance with my consent."
             value={photoPublications}
             onChange={setPhotoPublications}
             allowUntick
@@ -2892,9 +3023,60 @@ export default function ServiceAgreement({
             </tr>
           </tbody>
         </table>
-      </div>
-
       </fieldset>
+
+      {/* KALURA use only: editable in the HubSpot editor, read-only for participants. */}
+      <fieldset disabled={!isInEditor} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+        <SubHeading>KALURA Use Only – Verbal Consent Confirmation</SubHeading>
+
+        <p className={styles.bodyText}>
+          If verbal consent has been provided to a KALURA representative by the
+          person we support, or their parent, guardian, or authorised
+          representative, the following must be completed by the KALURA
+          representative:
+        </p>
+
+        <p className={styles.bodyText}>I confirm that:</p>
+
+        <p className={styles.bodyText}>
+          I have fully explained all the information in this Consent Form to
+        </p>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", margin: "0 0 10px" }}>
+          <div style={{ flex: "1 1 280px" }}>
+            <TextInput value={verbalConsentName} onChange={setVerbalConsentName} />
+          </div>
+          <span className={styles.bodyText}>[Insert Name], who is</span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", margin: "0 0 10px" }}>
+          <span className={styles.bodyText}>the</span>
+          <div style={{ flex: "1 1 280px" }}>
+            <TextInput value={verbalConsentRelationship} onChange={setVerbalConsentRelationship} />
+          </div>
+          <span className={styles.bodyText}>[Relationship to Participant].</span>
+        </div>
+
+        <p className={styles.bodyText}>
+          The information in this Consent Form accurately reflects the express
+          wishes of the person KALURA supports or their authorised
+          decision-maker.
+        </p>
+
+        <SubHeading>KALURA Representative:</SubHeading>
+
+        <table className={styles.infoTable}>
+          <tbody>
+            <tr>
+              <th>Full Name:</th>
+              <td>
+                <TextInput value={kaluraRepresentativeName} onChange={setKaluraRepresentativeName} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+      </div>
       <fieldset disabled={!isInEditor} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {/* ================================================================
           25. AGREEMENT SIGNATURES
