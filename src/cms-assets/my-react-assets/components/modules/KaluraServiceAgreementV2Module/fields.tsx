@@ -88,6 +88,12 @@ export interface FieldValues {
   serviceOpportunities?: "yes" | "no" | "";
   consentGiven?: boolean;
   consentName?: string;
+  consentExceptions?: string;
+
+  // Section 24 KALURA-use-only verbal consent confirmation (editor-filled).
+  verbalConsentName?: string;
+  verbalConsentRelationship?: string;
+  kaluraRepresentativeName?: string;
 
   // Section 23 (Schedule of Supports, 7 columns x 6 rows). Type-only, like
   // Section 24: values arrive from the quote property at render time.
