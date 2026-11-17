@@ -344,46 +344,6 @@ function toSection24Payload(values: Section24Values) {
   };
 }
 
-function Section24PrintSummary({ rows, exceptions, confirmed, name, showByDefault }: {
-  rows: { label: string; value: "yes" | "no" | "" }[];
-  exceptions: string;
-  confirmed: boolean;
-  name: string;
-  showByDefault: boolean;
-}) {
-  return (
-    <div className="k24-print-only" style={showByDefault ? { display: "block" } : undefined}>
-      <style>{`
-        .k24-print-only { display: none; }
-        @media print { .k24-print-only { display: block !important; } }
-      `}</style>
-      <h3 className={styles.subHeading}>Participant Consent Answers (summary)</h3>
-      <table className={styles.infoTable}>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.label}>
-              <th style={{ width: "75%" }}>{row.label}</th>
-              <td>{row.value === "yes" ? "Yes" : row.value === "no" ? "No" : "Not answered"}</td>
-            </tr>
-          ))}
-          <tr>
-            <th>Exceptions (people or organisations not to share with)</th>
-            <td style={{ whiteSpace: "pre-wrap" }}>{exceptions || "None listed"}</td>
-          </tr>
-          <tr>
-            <th>I have read and understood this Participant Consent Form</th>
-            <td>{confirmed ? "Yes" : "No"}</td>
-          </tr>
-          <tr>
-            <th>Participant Consent Name</th>
-            <td>{name}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function ServiceAgreement({
   heading,
   participantFullName,
@@ -3100,27 +3060,6 @@ export default function ServiceAgreement({
             </tr>
           </tbody>
         </table>
-
-<Section24PrintSummary
-  showByDefault={typeof window === "undefined"}
-  confirmed={consentGiven}
-  name={consentName}
-  exceptions={consentExceptions}
-  rows={[
-    { label: "Collect, use, and store my personal information to provide services", value: consentPersonalInfo },
-    { label: "Share my personal information with service providers (except as specified below)", value: consentProviders },
-    { label: "Use my de-identified information for research, analysis, and reporting", value: consentResearch },
-    { label: "Access my information on the NDIS Portal where required for service bookings", value: consentNdisPortal },
-    { label: "Access a copy of my NDIS Plan from the NDIA or its agents", value: consentNdisPlan },
-    { label: "Access the portion of my NDIS Plan that relates to KALURA-provided supports", value: consentNdisPortion },
-    { label: "Take and use photographs or videos of me to support service delivery", value: photoService },
-    { label: "Capture and share photographs or videos of me for celebrating achievements, participant stories and promotion", value: photoMarketing },
-    { label: "Share my photograph or image in printed materials, online publications or social media", value: photoPublications },
-    { label: "Send me information about services via a Newsletter", value: newsletter },
-    { label: "Contact me to advise me of service-related opportunities", value: serviceOpportunities },
-  ]}
-/>
-
       </fieldset>
 
       {/* KALURA use only: editable in the HubSpot editor, read-only for participants. */}
